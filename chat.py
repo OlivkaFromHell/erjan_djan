@@ -8,7 +8,7 @@ from random import random, randrange
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
-from weather import weather
+from weather import current_weather
 from gif_maker import create_gif, shakalize
 
 from config import token
@@ -164,7 +164,6 @@ while True:
                     if event.from_chat:
                         number = randrange(1, 1000)  
                         id = event.chat_id
-                        print(event)
 
                         msg = str(event.object.message['text']) 
                         id_user = re.match(pattern_phone, msg).group(3) # записываем id
@@ -211,7 +210,7 @@ while True:
                         #     send_photo(id, 'photo-202528897_457239141')
 
                         elif weather_now or msg == '!погода':
-                            send_msg(id, weather())
+                            send_msg(id, current_weather())
 
                         elif pognali: # ержан погнали/го/пойдем
                             if number < 300:

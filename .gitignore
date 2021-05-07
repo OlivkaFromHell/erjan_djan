@@ -1,0 +1,11 @@
+config.py
+info.py
+data/
+beta/
+__pycache__/
+.idea/
+subfiles/
+filzilla/
+gif/
+__pycache__/
+data/

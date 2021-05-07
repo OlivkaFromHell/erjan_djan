@@ -1,0 +1,9 @@
+Pillow==8.1.0
+regex==2020.11.13
+requests==2.25.1
+schedule==1.0.0
+vk==2.0.2
+vk-api==11.9.3
+vk-bot==0.6.1
+vk-client==0.2.0
+Wand==0.6.6

@@ -11,6 +11,7 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from weather import current_weather
 from gif_maker import create_gif, shakalize
 
+# information files
 from config import token
 from info import number_base
 
@@ -43,9 +44,13 @@ def season_left_days(id):
 
 def zhd_left_days(id):
     """отправляет фото ержана с пивом и кол-во дней до зхд"""
+    pictures_zhd = ['photo-202528897_457239152', 'photo-202528897_457239154', 
+                'photo-202528897_457239153', 'photo-202528897_457239157', 
+                'photo-202528897_457239155', 'photo-202528897_457239156']
+
     now = dt.datetime.now()
     send_msg(id, f"До заходского осталось {(zhd - now).days} дней")
-    send_photo(id, 'photo-202528897_457239032')
+    send_photo(id, pictures_zhd[6 - (zhd - now).days])
 
 
 def how_much_erjan_working(id):
@@ -154,6 +159,8 @@ pattern_how_many = r'(?i).*сколько.*'
 pattern_go = r'(?i).*ержан.* (го|погнали|пойдем|пошли).*'
 pattern_rso = r'(?i).*труд.*'
 pattern_weather = r'(?i).*ержан.*погода.*'
+
+
 
 start_work = dt.datetime.now() # ержан начал работать
 while True:

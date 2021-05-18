@@ -145,7 +145,7 @@ def send_ultrashakal(id, event):
     send_photo_from_folder(id, 'photo/shakal/shakal.jpg')
 
 
-season = dt.datetime(2021, 7, 7)
+season = dt.datetime(2021, 7, 1)
 zhd = dt.datetime(2021, 5, 21)
 
 # патерны для поиск в сообщение шаблонов
@@ -276,7 +276,8 @@ while True:
                             if 990 < number < 1001:
                                 send_msg(id, 'встану - ты ляжешь')
                             
-                            
+                        elif (msg == 'Веселое' or msg == 'Весёлое') and number < 500:
+                            send_msg(id, 'Нет блин грустное')    
 
                         elif understand and number < 300: # не понял
                             send_msg(id, 'поймешь')

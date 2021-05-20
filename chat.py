@@ -41,13 +41,13 @@ def season_left_days(id):
 
 def zhd_left_days(id):
     """отправляет фото ержана с пивом и кол-во дней до зхд"""
-    pictures_zhd = ['photo-202528897_457239152', 'photo-202528897_457239154', 
-                'photo-202528897_457239153', 'photo-202528897_457239157', 
-                'photo-202528897_457239155', 'photo-202528897_457239156']
+    # pictures_zhd = ['photo-202528897_457239152', 'photo-202528897_457239154', 
+    #             'photo-202528897_457239153', 'photo-202528897_457239157', 
+    #             'photo-202528897_457239155', 'photo-202528897_457239156']
 
     now = dt.datetime.now()
     send_msg(id, f"До заходского осталось {(zhd - now).days} дней")
-    send_photo(id, pictures_zhd[6 - (zhd - now).days])
+    send_photo(id, 'photo-202528897_457239087')
 
 def how_much_erjan_working(id):
     """пишет количество отработанных ержанном часов без перезапуска"""
@@ -141,7 +141,7 @@ def send_ultrashakal(id, event):
 
 
 season = dt.datetime(2021, 7, 1)
-zhd = dt.datetime(2021, 5, 21)
+zhd = dt.datetime(2021, 9, 18)
 
 # патерны для поиск в сообщение шаблонов
 # вот это хорошо было бы обернуть в словарь и вынести в другой файл

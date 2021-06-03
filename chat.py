@@ -27,17 +27,27 @@ def send_msg(id, text):
              'message': text,
              "random_id": 0})
 
-def send_photo(id, attachment): # функция отправки сообщения в чат
+def send_photo(id, attachment):
+    '''отправляем фото в чат'''
     sleep(0.3)
     return vk_session.method("messages.send",
             {'chat_id': id,
              'attachment': attachment,
              "random_id": 0})
 
+def send_msg_with_photo(id, text, attachment):
+    '''отправляем сообщение с фото в чат'''
+    sleep(0.5)
+    return vk_session.method("messages.send",
+                             {'chat_id': id,
+                              'message': text,
+                              'attachment': attachment,
+                              "random_id": 0})
+
 def season_left_days(id):
     """отправляет кол-во дней до сезона"""
     now = dt.datetime.now()
-    send_msg(id, f"До сезона осталось {(season - now).days} дней")
+    send_msg_with_photo(id, f"До сезона осталось {(season - now).days} дней", 'photo-202528897_457239167')
 
 def zhd_left_days(id):
     """отправляет фото ержана с пивом и кол-во дней до зхд"""
@@ -46,8 +56,8 @@ def zhd_left_days(id):
     #             'photo-202528897_457239155', 'photo-202528897_457239156']
 
     now = dt.datetime.now()
-    send_msg(id, f"До заходского осталось {(zhd - now).days} дней")
-    send_photo(id, 'photo-202528897_457239087')
+    send_msg_with_photo(id, f"До заходского осталось {(zhd - now).days} дней", 'photo-202528897_457239087')
+
 
 def how_much_erjan_working(id):
     """пишет количество отработанных ержанном часов без перезапуска"""
@@ -79,6 +89,7 @@ def send_doc(d, path):
     vk_session.method('messages.send', {'chat_id': id, 'message': ' ', 'attachment': upload_doc, 'random_id': 0})
 
 def download_photo(event):
+    '''Скачивает все изображения из сообщения'''
     amount_of_photos = len(event.object.message['attachments'])
     for i in range(amount_of_photos):
         m = []
@@ -97,6 +108,7 @@ def download_photo(event):
     return amount_of_photos
 
 def send_gif(id, event):
+    '''отправляет гифку, хранящуюся внутри директориии photo'''
     amount_of_photos = download_photo(event)
     photos = []
     for i in range(amount_of_photos):
@@ -106,6 +118,7 @@ def send_gif(id, event):
     send_doc(id, 'photo/erj.gif')
 
 def send_shakal(id, event):
+    '''Отправляет просто сжатую картинку пользователю'''
     resolutions = event.object.message['attachments'][0]['photo']['sizes']
     m = []
     for link in resolutions:
@@ -123,6 +136,7 @@ def send_shakal(id, event):
     send_photo_from_folder(id, 'photo/shakal/shakal.jpg')
 
 def send_ultrashakal(id, event):
+    '''Отправляет очень сжатую картинку пользователю'''
     resolutions = event.object.message['attachments'][0]['photo']['sizes']
     m = []
     for link in resolutions:
@@ -140,7 +154,7 @@ def send_ultrashakal(id, event):
     send_photo_from_folder(id, 'photo/shakal/shakal.jpg')
 
 
-season = dt.datetime(2021, 7, 1)
+season = dt.datetime(2021, 7, 3)
 zhd = dt.datetime(2021, 9, 18)
 
 # патерны для поиск в сообщение шаблонов
@@ -155,6 +169,7 @@ pattern_how_many = r'(?i).*сколько.*'
 pattern_go = r'(?i).*ержан.* (го|погнали|пойдем|пошли).*'
 pattern_rso = r'(?i).*труд.*'
 pattern_weather = r'(?i).*ержан.*погода.*'
+pattern_veseloe = r'(?i).*(веселое|весёлое).*'
 
 
 
@@ -171,6 +186,7 @@ while True:
                         msg = str(event.object.message['text']) 
                         id_user = re.match(pattern_phone, msg).group(3) # записываем id
 
+                        # Переписать этот модуль так, чтобы он не искал все .match()
                         days_left_to_season = re.match(pattern_days_left_to_season, msg) # сколько дней до сезона?
                         days_left_to_zhd = re.match(pattern_days_left_to_zhd, msg) # сколько дней до зхд
                         erj_que = re.match(pattern_erjan, msg) # ищет вопрос ержану
@@ -180,6 +196,7 @@ while True:
                         pognali = re.match(pattern_go, msg) # ержана зовут бухать
                         rso = re.match(pattern_rso, msg) # любим рсо
                         weather_now = re.match(pattern_weather, msg) # погода
+                        veseloe = re.match(pattern_veseloe, msg) # Веселое? нет блин грустное
 
                         if id_user and (int(id_user.group(3)) in number_base):
                             send_msg(id, f"Номер {number_base[int(id_user.group(3))][1]}: {number_base[int(id_user.group(3))][0]}")
@@ -235,11 +252,11 @@ while True:
                             send_msg(id, 'Я люблю РСО 🏳️‍🌈 🏳️‍🌈 🏳️‍🌈')  
 
                         elif erj_que: # вопросы к ержану
-                            if number < 251:
+                            if number < 351:
                                 send_msg(id, 'да')
-                            if 250 < number < 501:
+                            if 350 < number < 701:
                                 send_msg(id, 'нет')
-                            if 500 < number < 751:
+                            if 700 < number < 751:
                                 send_msg(id, 'мне поебать')
                             if 750 < number < 801:
                                 send_msg(id, 'суета')
@@ -275,7 +292,7 @@ while True:
                             if 990 < number < 1001:
                                 send_msg(id, 'встану - ты ляжешь')
                             
-                        elif (msg == 'Веселое' or msg == 'Весёлое') and number < 500:
+                        elif veseloe and number < 500:
                             send_msg(id, 'Нет блин грустное')    
 
                         elif understand and number < 300: # не понял

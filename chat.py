@@ -1,14 +1,13 @@
 import re
-import os
 import requests
 import datetime as dt 
 from time import sleep
-from random import random, randrange
+from random import randrange
 
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
-from weather import current_weather
+from weather import current_weather, time_of_sunrise, time_of_sunset
 from gif_maker import create_gif, shakalize
 
 # information files
@@ -159,18 +158,20 @@ zhd = dt.datetime(2021, 9, 18)
 
 # патерны для поиск в сообщение шаблонов
 # вот это хорошо было бы обернуть в словарь и вынести в другой файл
-pattern_phone = r'(?i).*(ержан|джа)?.*(какой|киньт?е?)?.*номер.у?.?\[\w\w(\d+)|.+' # шаблон поиска запроса
-pattern_days_left_to_season = r'(?i).*(ержан|джа)?.*сколько.+(дней)?.*до.+сезона.*\??'
-pattern_days_left_to_zhd = r'(?i).*(ержан|джа)?.*сколько.+(дней)?.*(до)?.*(зхд|заходское|заходского).*\??'
-pattern_erjan = r'(?i).*ержан.*\?$'
-pattern_understand = r'(?i).*не понял\.?$'
-pattern_hui = r'(?i).*иди нахуй$' 
-pattern_how_many = r'(?i).*сколько.*'
-pattern_go = r'(?i).*ержан.* (го|погнали|пойдем|пошли).*'
-pattern_rso = r'(?i).*труд.*'
-pattern_weather = r'(?i).*ержан.*погода.*'
-pattern_veseloe = r'(?i).*(веселое|весёлое).*'
 
+patterns = {
+    'pattern_phone' : r'(?i).*(ержан|джа)?.*(какой|киньт?е?)?.*номер.у?.?\[\w\w(\d+)|.+',
+    'pattern_days_left_to_season' : r'(?i).*(ержан|джа)?.*сколько.+(дней)?.*до.+сезона.*\??',
+    'pattern_days_left_to_zhd' : r'(?i).*(ержан|джа)?.*сколько.+(дней)?.*(до)?.*(зхд|заходское|заходского).*\??',
+    'pattern_erjan' : r'(?i).*ержан.*\?$',
+    'pattern_understand' : r'(?i).*не понял\.?$',
+    'pattern_hui' : r'(?i).*иди нахуй$' ,
+    'pattern_how_many' : r'(?i).*сколько.*',
+    'pattern_go' : r'(?i).*ержан.* (го|погнали|пойдем|пошли).*',
+    'pattern_rso' : r'(?i).*труд.*',
+    'pattern_weather' : r'(?i).*ержан.*погода.*',
+    'pattern_veseloe' : r'(?i).*(веселое|весёлое).*',
+}
 
 
 start_work = dt.datetime.now() # ержан начал работать
@@ -183,75 +184,11 @@ while True:
                         number = randrange(1, 1000)  
                         id = event.chat_id
 
-                        msg = str(event.object.message['text']) 
-                        id_user = re.match(pattern_phone, msg).group(3) # записываем id
+                        msg = str(event.object.message['text'])
 
-                        # Переписать этот модуль так, чтобы он не искал все .match()
-                        days_left_to_season = re.match(pattern_days_left_to_season, msg) # сколько дней до сезона?
-                        days_left_to_zhd = re.match(pattern_days_left_to_zhd, msg) # сколько дней до зхд
-                        erj_que = re.match(pattern_erjan, msg) # ищет вопрос ержану
-                        understand = re.match(pattern_understand, msg) # ищет сочетание не понял
-                        how_many = re.match(pattern_how_many, msg) # ищет вопрос сколько
-                        nahui = re.match(pattern_hui, msg) # ержана послали нахуй?
-                        pognali = re.match(pattern_go, msg) # ержана зовут бухать
-                        rso = re.match(pattern_rso, msg) # любим рсо
-                        weather_now = re.match(pattern_weather, msg) # погода
-                        veseloe = re.match(pattern_veseloe, msg) # Веселое? нет блин грустное
-
-                        if id_user and (int(id_user.group(3)) in number_base):
-                            send_msg(id, f"Номер {number_base[int(id_user.group(3))][1]}: {number_base[int(id_user.group(3))][0]}")
-
-                        elif days_left_to_season or msg == '!сезон':
-                            season_left_days(id)
-
-                        elif days_left_to_zhd or msg == '!зхд':
-                            zhd_left_days(id)
-
-                        elif (msg == 'Да' or msg == 'да' or msg == 'ДА') and number < 150:
-                            send_msg(id, 'Манда')
-                        elif (msg == 'Нет' or msg == 'нет' or msg == 'НЕТ') and number < 150:
-                            send_msg(id, 'Пидора ответ')
-                        elif msg == 'Ержан,работаешь?':  # проверка бота работоспособность
-                            send_photo(id, 'photo-202528897_457239027')
-
-                        elif msg == 'Ержан, давно работаешь?' or msg == '!работа':
-                            how_much_erjan_working(id)
-
-                        elif msg == 'Ержан, сделай гифку':
-                            send_gif(id, event)
-
-                        elif msg == 'Ержан, шакализируй' or msg == 'Ержан, шакал':
-                            send_shakal(id, event)
-
-                        elif msg == 'Ержан, ультрашакал':
-                            send_ultrashakal(id, event)
-
-                        # elif msg == 'Ержан, пиши диплом':
-                        #     send_photo(id, 'photo-202528897_457239141')
-
-                        elif weather_now or msg == '!погода':
-                            send_msg(id, current_weather())
-
-                        elif pognali: # ержан погнали/го/пойдем
-                            if number < 300:
-                                send_msg(id, 'выезжаю')
-                            elif number <600:
-                                send_msg(id, 'без деда никуда не пойду')
-                            elif number <900:
-                                send_msg(id, 'погнали')
-                            elif number > 900:
-                                send_msg(id, 'с дедом хоть на край света')
-
-                        elif how_many:  # вопросы с ключом сколько
-                            if number > 800:
-                                send_msg(id, 'дохуя')
-                            else:
-                                send_msg(id, round(number/10))
-
-                        elif rso: # триггер на слова с "труд"
-                            send_msg(id, 'Я люблю РСО 🏳️‍🌈 🏳️‍🌈 🏳️‍🌈')  
-
-                        elif erj_que: # вопросы к ержану
+                        id_user = re.match(patterns['pattern_phone'], msg).group(3) 
+                        
+                        if re.match(patterns['pattern_erjan'], msg): # ищет вопрос ержану
                             if number < 351:
                                 send_msg(id, 'да')
                             if 350 < number < 701:
@@ -291,26 +228,91 @@ while True:
                                 send_msg(id, 'по-любому, езжи')
                             if 990 < number < 1001:
                                 send_msg(id, 'встану - ты ляжешь')
-                            
-                        elif veseloe and number < 500:
-                            send_msg(id, 'Нет блин грустное')    
 
-                        elif understand and number < 300: # не понял
+                        elif re.match(patterns['pattern_how_many'], msg): # ищет вопрос сколько
+                            if number > 800:
+                                send_msg(id, 'дохуя')
+                            else:
+                                send_msg(id, round(number/10))
+
+                        elif re.match(patterns['pattern_days_left_to_season'], msg) or msg == '!сезон':
+                            season_left_days(id)
+
+                        elif re.match(patterns['pattern_days_left_to_zhd'], msg) or msg == '!зхд': # сколько дней до зхд
+                            zhd_left_days(id)
+                      
+                        elif re.match(patterns['pattern_weather'], msg) or msg == '!погода': # погода
+                            send_msg(id, current_weather())
+
+                        elif re.match(patterns['pattern_understand'], msg) and number < 300: # не понял
                             send_msg(id, 'поймешь')
-
-                        elif nahui and number > 700: # ержана послали нахуй
+                        
+                        elif re.match(patterns['pattern_hui'], msg): # ержана послали нахуй?
                             send_msg(id, 'Сам нахуй иди')
+
+                        elif re.match(patterns['pattern_go'], msg): # ержана зовут бухать
+                            if number < 300:
+                                send_msg(id, 'выезжаю')
+                            elif number <600:
+                                send_msg(id, 'без деда никуда не пойду')
+                            elif number <900:
+                                send_msg(id, 'погнали')
+                            elif number > 900:
+                                send_msg(id, 'с дедом хоть на край света')
+
+                        elif re.match(patterns['pattern_rso'], msg): # любим рсо
+                            send_msg(id, 'Я люблю РСО 🏳️‍🌈 🏳️‍🌈 🏳️‍🌈') 
+
+                        elif re.match(patterns['pattern_veseloe'], msg): # Веселое? нет блин грустное
+                            send_msg(id, 'Нет блин грустное')
+
+                        elif id_user and int(id_user) in number_base: # записываем id
+                            send_msg(id, f"Номер {number_base[int(id_user)][1]}: {number_base[int(id_user)][0]}")
+                                 
+                        elif (msg == 'Да' or msg == 'да' or msg == 'ДА') and number < 150:
+                            send_msg(id, 'Манда')
+
+                        elif (msg == 'Нет' or msg == 'нет' or msg == 'НЕТ') and number < 150:
+                            send_msg(id, 'Пидора ответ')
+
+                        elif msg == 'Ержан,работаешь?':  # проверка бота работоспособность
+                            send_photo(id, 'photo-202528897_457239027')
+
+                        elif msg == 'Ержан, давно работаешь?' or msg == '!работа':
+                            how_much_erjan_working(id)
+
+                        elif msg == 'Ержан, сделай гифку':
+                            send_gif(id, event)
+
+                        elif msg == 'Ержан, шакализируй' or msg == 'Ержан, шакал':
+                            send_shakal(id, event)
+
+                        elif msg == 'Ержан, ультрашакал':
+                            send_ultrashakal(id, event)
+
+                        elif msg == 'Ержан, пиши диплом':
+                            send_photo(id, 'photo-202528897_457239141')
+
+                        elif msg == '!восход' or msg == '!рассвет':
+                            send_msg(id, time_of_sunrise())
+
+                        elif msg == '!заход' or msg == '!закат':
+                            send_msg(id, time_of_sunset())
+
+                        elif msg == '!время':
+                            current_time = dt.datetime.now()
+                            current_time  = current_time.strftime('%H:%M')
+                            #ans = f'Текущее время {current_time}'
+                            send_msg(id, current_time)
+
+                        elif msg == 'Ержан, который час?':
+                            send_msg(id, 'время пива!')
 
                         elif msg == 'один раз': # no comments
                             send_msg(id, 'не пидорас')
 
-                        # удаляем все файлы в каталоге photo 
-                        # filelist = [ f for f in os.listdir('photo')]
-                        # for f in filelist:
-                        #     os.remove(os.path.join('photo', f))
-
                 except Exception as e:
-                    print(e)
+                    pass
                    
     except Exception:
         send_msg(1, 'Сервер перезагрузился')

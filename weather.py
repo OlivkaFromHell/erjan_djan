@@ -145,4 +145,4 @@ def for_day_weather():
     return ans
 
 if __name__ == '__main__':
-    print(current_weather())
+    print(time_of_sunrise())

@@ -49,10 +49,6 @@ def season_left_days(id):
     send_msg_with_photo(id, f"До сезона осталось {(season - now).days} дней", 'photo-202528897_457239167')
 
 def zhd_left_days(id):
-    """отправляет фото ержана с пивом и кол-во дней до зхд"""
-    # pictures_zhd = ['photo-202528897_457239152', 'photo-202528897_457239154', 
-    #             'photo-202528897_457239153', 'photo-202528897_457239157', 
-    #             'photo-202528897_457239155', 'photo-202528897_457239156']
 
     now = dt.datetime.now()
     send_msg_with_photo(id, f"До заходского осталось {(zhd - now).days} дней", 'photo-202528897_457239087')
@@ -165,7 +161,7 @@ patterns = {
     'pattern_days_left_to_zhd' : r'(?i).*(ержан|джа)?.*сколько.+(дней)?.*(до)?.*(зхд|заходское|заходского).*\??',
     'pattern_erjan' : r'(?i).*ержан.*\?$',
     'pattern_understand' : r'(?i).*не понял\.?$',
-    'pattern_hui' : r'(?i).*иди нахуй$' ,
+    'pattern_www' : r'(?i).*wwwwwwww$' ,
     'pattern_how_many' : r'(?i).*сколько.*',
     'pattern_go' : r'(?i).*ержан.* (го|погнали|пойдем|пошли).*',
     'pattern_rso' : r'(?i).*труд.*',
@@ -194,44 +190,32 @@ while True:
                             if 350 < number < 701:
                                 send_msg(id, 'нет')
                             if 700 < number < 751:
-                                send_msg(id, 'мне поебать')
+                                send_msg(id, 'wwwwwwwwwww')
                             if 750 < number < 801:
                                 send_msg(id, 'суета')
                             if 800 < number < 821:
-                                send_msg(id, 'один раз не пидорас')
+                                send_msg(id, 'wwwwwwwwwww')
                             if 820 < number < 851:
                                 send_msg(id, 'узнаешь')
                             
                             if 850 < number < 876:
                                 send_msg(id, 'я больше не работаю')
                             if 875 < number < 881:
-                                send_msg(id, 'Я, блять, в своём познании настолько преисполнился, \
-                                    что я как будто бы уже 100 триллионов миллиардов лет, блять,\
-                                    проживаю на триллионах и триллионах таких же планет, понимаешь?\
-                                    Как эта Земля. Мне уже этот мир абсолютно понятен, и я здесь ищу\
-                                    только одного: покоя, умиротворения и вот этой гармонии от слияния \
-                                    с бесконечно вечным.')
+                                send_msg(id, 'wwwwwwwwwww')
                             if 880 < number < 886:
-                                send_msg(id, 'Как вам сказать… \
-                                    Я прожила довольно долгую жизнь… \
-                                    Ибрагим вам что-нибудь говорит?\
-                                    Прекрасное имя. Аллах акбар. \
-                                    Я прошла афганскую войну. И я желаю всем мужчинам пройти ее.\
-                                    Мужчина определяется делом, а не словом.\
-                                    И если я ношу кандибобер на голове, это не значит,\
-                                    что я женщина или балерина')
+                                send_msg(id, 'wwwwwwwwwww')
                             if 885 < number < 926:
-                                send_msg(id, 'отвечаю')
+                                send_msg(id, 'wwwwwwwwwww')
                             if 925 < number < 951:
-                                send_msg(id, 'Ахахах, насмешил. Гуляй')
+                                send_msg(id, 'wwwwwwwwwww')
                             if 950 < number < 991:
-                                send_msg(id, 'по-любому, езжи')
+                                send_msg(id, 'wwwwwwwwwww')
                             if 990 < number < 1001:
-                                send_msg(id, 'встану - ты ляжешь')
+                                send_msg(id, 'wwwwwwwwwww')
 
                         elif re.match(patterns['pattern_how_many'], msg): # ищет вопрос сколько
                             if number > 800:
-                                send_msg(id, 'дохуя')
+                                send_msg(id, 'wwwwwwwwwww')
                             else:
                                 send_msg(id, round(number/10))
 
@@ -245,10 +229,10 @@ while True:
                             send_msg(id, current_weather())
 
                         elif re.match(patterns['pattern_understand'], msg) and number < 300: # не понял
-                            send_msg(id, 'поймешь')
+                            send_msg(id, 'wwwwwwwwwww')
                         
                         elif re.match(patterns['pattern_hui'], msg): # ержана послали нахуй?
-                            send_msg(id, 'Сам нахуй иди')
+                            send_msg(id, 'wwwwwwwwwww')
 
                         elif re.match(patterns['pattern_go'], msg): # ержана зовут бухать
                             if number < 300:
@@ -270,10 +254,10 @@ while True:
                             send_msg(id, f"Номер {number_base[int(id_user)][1]}: {number_base[int(id_user)][0]}")
                                  
                         elif (msg == 'Да' or msg == 'да' or msg == 'ДА') and number < 150:
-                            send_msg(id, 'Манда')
+                            send_msg(id, 'wwwwwwwwwww')
 
                         elif (msg == 'Нет' or msg == 'нет' or msg == 'НЕТ') and number < 150:
-                            send_msg(id, 'Пидора ответ')
+                            send_msg(id, 'wwwwwwwwwww')
 
                         elif msg == 'Ержан,работаешь?':  # проверка бота работоспособность
                             send_photo(id, 'photo-202528897_457239027')

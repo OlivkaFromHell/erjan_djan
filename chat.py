@@ -1,8 +1,9 @@
+import random
 import re
 import requests
 import datetime as dt
 from time import sleep
-from random import randrange
+from random import randrange, choice
 
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
@@ -20,12 +21,13 @@ groupId = 202528897
 longpoll = VkBotLongPoll(vk_session, groupId)
 
 
-def send_msg(id, text):
+def send_msg(id, text, attachment=''):
     sleep(0.5)
     return vk_session.method("messages.send",
                              {'chat_id': id,
                               'message': text,
-                              "random_id": 0})
+                              'attachment': attachment,
+                              'random_id': 0})
 
 
 def send_photo(id, attachment):
@@ -33,16 +35,6 @@ def send_photo(id, attachment):
     sleep(0.3)
     return vk_session.method("messages.send",
                              {'chat_id': id,
-                              'attachment': attachment,
-                              "random_id": 0})
-
-
-def send_msg_with_photo(id, text, attachment):
-    """отправляем сообщение с фото в чат"""
-    sleep(0.5)
-    return vk_session.method("messages.send",
-                             {'chat_id': id,
-                              'message': text,
                               'attachment': attachment,
                               "random_id": 0})
 
@@ -181,6 +173,26 @@ patterns = {
     'pattern_rso': r'(?i).*труд.*',
     'pattern_weather': r'(?i).*ержан.*погода.*',
     'pattern_veseloe': r'(?i).*(веселое|весёлое).*',
+    ################################################
+    'pattern_5': r'(?i).*(карт).*(пятероч).*',
+    'pattern_lenta': r'(?i).*(карт).*(ленты|лента).*',
+    'pattern_perek': r'(?i).*(карт).*(перек|перекрест).*',
+    'pattern_magnit': r'(?i).*(карт).*(магнит).*',
+    'pattern_okey': r'(?i).*(карт).*(магнит).*',
+    'pattern_prisma': r'(?i).*(карт).*(призм).*',
+    'pattern_sportmaster': r'(?i).*(карт).*(спортмастер).*',
+    'pattern_trial_sport': r'(?i).*(карт).*(триал спорт).*',
+}
+
+loyality_cards = {
+    '5': ['photo-202528897_457239175'],
+    'lenta': ['photo-202528897_457239178', 'photo-202528897_457239189', 'photo-202528897_457239190'],
+    'perek': ['photo-202528897_457239181'],
+    'magnit': ['photo-202528897_457239179'],
+    'okey': ['photo-202528897_457239180', 'photo-202528897_457239188'],
+    'prisma': ['photo-202528897_457239174'],
+    'sportmaster': ['photo-202528897_457239176'],
+    'trial_sport': ['photo-202528897_457239177'],
 }
 
 start_work = dt.datetime.now()  # ержан начал работать
@@ -231,6 +243,32 @@ while True:
 
                         elif id_user and int(id_user) in number_base:  # записываем id
                             send_msg(id, f"Номер {number_base[int(id_user)][1]}: {number_base[int(id_user)][0]}")
+
+                        # loyality cards block
+                        elif msg == '!пятерочка' or re.match(patterns['pattern_5'], msg):
+                            attachment = random.choice(loyality_cards['5'])
+                            send_msg(id, text='держи, брат', attachment=attachment)
+                        elif msg == '!перекресток' or msg == '!перек' or re.match(patterns['pattern_perek'], msg):
+                            attachment = random.choice(loyality_cards['perek'])
+                            send_msg(id, text='держи, брат', attachment=attachment)
+                        elif msg == '!лента' or re.match(patterns['pattern_lenta'], msg):
+                            attachment = random.choice(loyality_cards['lenta'])
+                            send_msg(id, text='держи, брат', attachment=attachment)
+                        elif msg == '!магнит' or re.match(patterns['pattern_magnit'], msg):
+                            attachment = random.choice(loyality_cards['magnit'])
+                            send_msg(id, text='держи, брат', attachment=attachment)
+                        elif msg == '!призма' or re.match(patterns['pattern_prisma'], msg):
+                            attachment = random.choice(loyality_cards['prisma'])
+                            send_msg(id, text='держи, брат', attachment=attachment)
+                        elif msg == '!окей' or re.match(patterns['pattern_okey'], msg):
+                            attachment = random.choice(loyality_cards['okey'])
+                            send_msg(id, text='держи, брат', attachment=attachment)
+                        elif msg == '!триал спорт' or re.match(patterns['pattern_trial_sport'], msg):
+                            attachment = random.choice(loyality_cards['trial_sport'])
+                            send_msg(id, text='держи, брат', attachment=attachment)
+                        elif msg == '!спортмастер' or re.match(patterns['pattern_sportmaster'], msg):
+                            attachment = random.choice(loyality_cards['sportmaster'])
+                            send_msg(id, text='держи, брат', attachment=attachment)
 
                         ##############################################################################
 
@@ -323,6 +361,7 @@ while True:
 
                 except Exception as e:
                     pass
+
 
     except Exception:
         send_msg(1, 'Сервер перезагрузился')

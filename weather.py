@@ -1,5 +1,4 @@
 import requests
-import json
 from datetime import datetime
 
 text_to_emoji = {
@@ -18,8 +17,7 @@ text_to_emoji = {
 def get_forecast_data():
     """send current weather and weather description"""
     api_url = 'http://api.openweathermap.org/data/2.5/forecast'
-    s_city = "Санкт-Петербург"
-    city_id = 0
+    s_city = "Судак"
     appid = 'a1e9cd07fa2f720fa36b7a5870f75f66'
 
     params = {
@@ -66,7 +64,7 @@ def time_of_sunset(data=get_forecast_data()):
 def current_weather():
     """send current weather and weather description"""
     api_url = 'http://api.openweathermap.org/data/2.5/weather'
-    s_city = "Санкт-Петербург"
+    s_city = "Судак"
     city_id = 0
     appid = 'a1e9cd07fa2f720fa36b7a5870f75f66'
 
@@ -80,7 +78,7 @@ def current_weather():
     res = requests.get(api_url, params=params)
 
     data = res.json()
-    template = 'Сейчас на улице {}°С | {} \nОблачность: {}%'
+    template = 'Сейчас в Веселом {}°С | {} \nОблачность: {}%'
     temperature = round(data['main']['temp'])
     weather_description = data['weather'][0]['description']
     if weather_description in text_to_emoji:
@@ -96,7 +94,7 @@ def current_weather():
 def for_day_weather():
     """send current weather and weather description"""
     api_url = 'http://api.openweathermap.org/data/2.5/forecast'
-    s_city = "Санкт-Петербург"
+    s_city = "Судак"
     city_id = 0
     appid = 'a1e9cd07fa2f720fa36b7a5870f75f66'
 
@@ -121,7 +119,7 @@ def for_day_weather():
 
     
     daily_morning = data['list'][0]
-    template = 'Сейчас на улице {}°С | {}\n'
+    template = 'Сейчас в Веселом {}°С | {}\n'
     tem = convert_temp_descript(daily_morning)
     ans += template.format(tem[0], tem[1])
 
@@ -145,4 +143,4 @@ def for_day_weather():
     return ans
 
 if __name__ == '__main__':
-    print(time_of_sunrise())
+    print(current_weather())

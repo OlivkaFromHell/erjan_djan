@@ -29,7 +29,7 @@ def send_msg(id, text):
 
 
 def send_photo(id, attachment):
-    '''отправляем фото в чат'''
+    """отправляем фото в чат"""
     sleep(0.3)
     return vk_session.method("messages.send",
                              {'chat_id': id,
@@ -38,7 +38,7 @@ def send_photo(id, attachment):
 
 
 def send_msg_with_photo(id, text, attachment):
-    '''отправляем сообщение с фото в чат'''
+    """отправляем сообщение с фото в чат"""
     sleep(0.5)
     return vk_session.method("messages.send",
                              {'chat_id': id,
@@ -96,7 +96,7 @@ def send_doc(d, path):
 
 
 def download_photo(event):
-    '''Скачивает все изображения из сообщения'''
+    """Скачивает все изображения из сообщения"""
     amount_of_photos = len(event.object.message['attachments'])
     for i in range(amount_of_photos):
         m = []
@@ -116,7 +116,7 @@ def download_photo(event):
 
 
 def send_gif(id, event):
-    '''отправляет гифку, хранящуюся внутри директориии photo'''
+    """отправляет гифку, хранящуюся внутри директориии photo"""
     amount_of_photos = download_photo(event)
     photos = []
     for i in range(amount_of_photos):
@@ -127,7 +127,7 @@ def send_gif(id, event):
 
 
 def send_shakal(id, event):
-    '''Отправляет просто сжатую картинку пользователю'''
+    """Отправляет просто сжатую картинку пользователю"""
     resolutions = event.object.message['attachments'][0]['photo']['sizes']
     m = []
     for link in resolutions:
@@ -146,7 +146,7 @@ def send_shakal(id, event):
 
 
 def send_ultrashakal(id, event):
-    '''Отправляет очень сжатую картинку пользователю'''
+    """Отправляет очень сжатую картинку пользователю"""
     resolutions = event.object.message['attachments'][0]['photo']['sizes']
     m = []
     for link in resolutions:
@@ -168,7 +168,6 @@ season = dt.datetime(2021, 8, 29)
 zhd = dt.datetime(2021, 9, 18)
 
 # патерны для поиск в сообщение шаблонов
-# вот это хорошо было бы обернуть в словарь и вынести в другой файл
 
 patterns = {
     'pattern_phone': r'(?i).*(ержан|джа)?.*(какой|киньт?е?)?.*номер.у?.?\[\w\w(\d+)|.+',
@@ -207,10 +206,12 @@ while True:
                                 send_msg(id, 'погнали')
                             elif number > 900:
                                 send_msg(id, 'с дедом хоть на край света')
-                        elif re.match(patterns['pattern_weather'], msg) or msg == '!погода':  # погода
+
+                        elif (msg == '!погода') or re.match(patterns['pattern_weather'], msg):  # погода
                             send_msg(id, current_weather())
-                        elif re.match(patterns['pattern_days_left_to_zhd'],
-                                      msg) or msg == '!зхд':  # сколько дней до зхд
+
+                        # сколько дней до зхд
+                        elif (msg == '!зхд') or re.match(patterns['pattern_days_left_to_zhd'], msg):
                             zhd_left_days(id)
 
                         elif re.match(patterns['pattern_how_many'], msg):  # ищет вопрос сколько
@@ -246,16 +247,16 @@ while True:
                                 send_msg(id, 'один раз не пидорас')
                             if 820 < number < 851:
                                 send_msg(id, 'узнаешь')
-                            if 850 < number < 876:
+                            if 850 < number < 856:
                                 send_msg(id, 'я больше не работаю')
-                            if 875 < number < 881:
+                            if 855 < number < 866:
                                 send_msg(id, 'Я, блять, в своём познании настолько преисполнился, \
                                     что я как будто бы уже 100 триллионов миллиардов лет, блять,\
                                     проживаю на триллионах и триллионах таких же планет, понимаешь?\
                                     Как эта Земля. Мне уже этот мир абсолютно понятен, и я здесь ищу\
                                     только одного: покоя, умиротворения и вот этой гармонии от слияния \
                                     с бесконечно вечным.')
-                            if 880 < number < 886:
+                            if 865 < number < 876:
                                 send_msg(id, 'Как вам сказать… \
                                     Я прожила довольно долгую жизнь… \
                                     Ибрагим вам что-нибудь говорит?\
@@ -264,13 +265,13 @@ while True:
                                     Мужчина определяется делом, а не словом.\
                                     И если я ношу кандибобер на голове, это не значит,\
                                     что я женщина или балерина')
-                            if 885 < number < 926:
+                            if 875 < number < 901:
                                 send_msg(id, 'отвечаю')
-                            if 925 < number < 951:
+                            if 900 < number < 916:
                                 send_msg(id, 'Ахахах, насмешил. Гуляй')
-                            if 950 < number < 991:
+                            if 915 < number < 941:
                                 send_msg(id, 'по-любому, езжи')
-                            if 990 < number < 1001:
+                            if 940 < number < 955:
                                 send_msg(id, 'встану - ты ляжешь')
 
                         elif re.match(patterns['pattern_days_left_to_season'], msg) or msg == '!сезон':
@@ -315,7 +316,6 @@ while True:
                         elif msg == '!время':
                             current_time = dt.datetime.now()
                             current_time = current_time.strftime('%H:%M')
-                            # ans = f'Текущее время {current_time}'
                             send_msg(id, current_time)
 
                         elif msg == 'один раз':  # no comments

@@ -9,15 +9,15 @@ import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 from weather import current_weather, time_of_sunrise, time_of_sunset
-from gif_maker import create_gif, shakalize
+# from gif_maker import create_gif, shakalize
 
 # information files
-from config import token
-from info import number_base
+from config import token, groupId
+from info import number_base, sber_card_number, sber_phone_number
 
 vk_session = vk_api.VkApi(token=token)  # Передаем токен сообщества
 vk = vk_session.get_api()
-groupId = 202528897
+groupId = groupId
 longpoll = VkBotLongPoll(vk_session, groupId)
 
 
@@ -41,8 +41,8 @@ def send_photo(id, attachment):
 
 def season_left_days(id):
     """отправляет кол-во дней до сезона"""
-    now = dt.datetime.now()
-    send_msg_with_photo(id, f"До конца сезона осталось {(season - now).days} дней", 'photo-202528897_457239185')
+    days_left = (zhd - now).days
+    send_msg(id, f"До конца сезона осталось {days_left} дней", attachment='photo-202528897_457239185')
 
 
 def zhd_left_days(id):
@@ -52,7 +52,11 @@ def zhd_left_days(id):
     #             'photo-202528897_457239155', 'photo-202528897_457239156']
 
     now = dt.datetime.now()
-    send_msg_with_photo(id, f"До заходского осталось {(zhd - now).days} дней", 'photo-202528897_457239087')
+    days_left = (zhd - now).days
+    sentence_end = ''
+    send_msg(id, f"До заходского осталось {days_left} дней", attachment='photo-202528897_457239087')
+
+
 
 
 def how_much_erjan_working(id):
@@ -173,6 +177,7 @@ patterns = {
     'pattern_rso': r'(?i).*труд.*',
     'pattern_weather': r'(?i).*ержан.*погода.*',
     'pattern_veseloe': r'(?i).*(веселое|весёлое).*',
+    'pattern_sber': r'(?i).*(карт).*(сбер).*',
     ################################################
     'pattern_5': r'(?i).*(карт).*(пятероч).*',
     'pattern_lenta': r'(?i).*(карт).*(ленты|лента).*',
@@ -204,9 +209,7 @@ while True:
                     if event.from_chat:
                         number = randrange(1, 1000)
                         id = event.chat_id
-
                         msg = str(event.object.message['text'])
-
                         id_user = re.match(patterns['pattern_phone'], msg).group(3)
 
                         if re.match(patterns['pattern_go'], msg):  # ержана зовут бухать
@@ -244,7 +247,11 @@ while True:
                         elif id_user and int(id_user) in number_base:  # записываем id
                             send_msg(id, f"Номер {number_base[int(id_user)][1]}: {number_base[int(id_user)][0]}")
 
-                        # loyality cards block
+                        elif msg == '!сбер' or re.match(patterns['pattern_sber'], msg):
+                            ans = f'Да, жду бананы\n\n{sber_card_number}\n{sber_phone_number}'
+                            send_msg(id, ans)
+
+                        # loyalty cards block
                         elif msg == '!пятерочка' or re.match(patterns['pattern_5'], msg):
                             attachment = random.choice(loyality_cards['5'])
                             send_msg(id, text='держи, брат', attachment=attachment)
@@ -271,7 +278,7 @@ while True:
                             send_msg(id, text='держи, брат', attachment=attachment)
 
                         ##############################################################################
-
+                        
                         elif re.match(patterns['pattern_erjan'], msg):  # ищет вопрос ержану
                             if number < 351:
                                 send_msg(id, 'да')
@@ -358,10 +365,8 @@ while True:
 
                         elif msg == 'один раз':  # no comments
                             send_msg(id, 'не пидорас')
-
                 except Exception as e:
-                    pass
-
+                    print(e)
 
     except Exception:
         send_msg(1, 'Сервер перезагрузился')

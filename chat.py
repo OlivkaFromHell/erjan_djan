@@ -20,6 +20,10 @@ vk = vk_session.get_api()
 groupId = groupId
 longpoll = VkBotLongPoll(vk_session, groupId)
 
+season = dt.datetime(2021, 8, 29)
+zhd = dt.datetime(2021, 9, 18)
+start_work = dt.datetime.now() # ержан начал работать
+
 
 def send_msg(id, text, attachment=''):
     sleep(0.5)
@@ -39,42 +43,42 @@ def send_photo(id, attachment):
                               "random_id": 0})
 
 
-def end_of_days_wrapper(func):
-    def wrapper(id):
-        now = dt.datetime.now()
-        days_left = (zhd - now).days
-        if days_left % 10 == 1:
-            sentence_end = 'день'
-        elif days_left % 10 in (2, 3, 4):
-            sentence_end = 'дня'
-        else:
-            sentence_end = 'дней'
-        return func(id, sentence_end=sentence_end)
-    return wrapper
+def end_of_days_wrapper(date):
+    def decorator(func):
+        def wrapper(id):
+            now = dt.datetime.now()
+            days_left = (date - now).days
+            if days_left < 0:
+                days_left = abs(days_left) - 1
+            if days_left % 10 == 1:
+                sentence_end = 'день'
+            elif days_left % 10 in (2, 3, 4):
+                sentence_end = 'дня'
+            else:
+                sentence_end = 'дней'
+            return func(id, days_left, sentence_end=sentence_end)
+        return wrapper
+    return decorator
 
 
-@end_of_days_wrapper
-def season_left_days(id, sentence_end='дней'):
+@end_of_days_wrapper(season)
+def season_left_days(id, days_left, sentence_end='дней'):
     """отправляет кол-во дней до сезона"""
-    now = dt.datetime.now()
-    days_left = (zhd - now).days
     send_msg(id, f"До конца сезона осталось {days_left} {sentence_end}", attachment='photo-202528897_457239185')
 
 
-@end_of_days_wrapper
-def zhd_left_days(id, sentence_end='дней'):
+@end_of_days_wrapper(zhd)
+def zhd_left_days(id, days_left, sentence_end='дней'):
     """отправляет фото ержана с пивом и кол-во дней до зхд"""
     # pictures_zhd = ['photo-202528897_457239152', 'photo-202528897_457239154', 
     #             'photo-202528897_457239153', 'photo-202528897_457239157', 
     #             'photo-202528897_457239155', 'photo-202528897_457239156']
 
-    now = dt.datetime.now()
-    days_left = (zhd - now).days
     send_msg(id, f"До заходского осталось {days_left} {sentence_end}", attachment='photo-202528897_457239087')
 
 
-@end_of_days_wrapper
-def how_much_erjan_working(id, sentence_end='дней'):
+@end_of_days_wrapper(start_work)
+def how_much_erjan_working(id, days_left, sentence_end='дней'):
     """пишет количество отработанных ержанном часов без перезапуска"""
     now = dt.datetime.now()
     time_left = now - start_work
@@ -98,7 +102,7 @@ def send_photo_from_folder(id, path):
     vk_session.method('messages.send', {'chat_id': id, 'message': ' ', 'attachment': upload_ph, 'random_id': 0})
 
 
-def send_doc(d, path):
+def send_doc(path):
     """отправляем любые доки"""
     # vk - <class 'vk_api.vk_api.VkApiMethod'>
     doc = vk_api.upload.VkUpload(vk).document_message(open(path, 'rb'), peer_id=2_000_000_000 + id)
@@ -175,11 +179,7 @@ def send_ultrashakal(id, event):
     send_photo_from_folder(id, 'photo/shakal/shakal.jpg')
 
 
-season = dt.datetime(2021, 8, 29)
-zhd = dt.datetime(2021, 9, 18)
-
 # патерны для поиск в сообщение шаблонов
-
 patterns = {
     'pattern_phone': r'(?i).*(ержан|джа)?.*(какой|киньт?е?)?.*номер.у?.?\[\w\w(\d+)|.+',
     'pattern_days_left_to_season': r'(?i).*(ержан|джа)?.*сколько.+(дней)?.*до.+сезона.*\??',
@@ -215,7 +215,6 @@ loyality_cards = {
     'trial_sport': ['photo-202528897_457239177'],
 }
 
-start_work = dt.datetime.now()  # ержан начал работать
 while True:
     try:
         for event in longpoll.listen():

@@ -39,13 +39,30 @@ def send_photo(id, attachment):
                               "random_id": 0})
 
 
-def season_left_days(id):
+def end_of_days_wrapper(func):
+    def wrapper(id):
+        now = dt.datetime.now()
+        days_left = (zhd - now).days
+        if days_left % 10 == 1:
+            sentence_end = 'день'
+        elif days_left % 10 in (2, 3, 4):
+            sentence_end = 'дня'
+        else:
+            sentence_end = 'дней'
+        return func(id, sentence_end=sentence_end)
+    return wrapper
+
+
+@end_of_days_wrapper
+def season_left_days(id, sentence_end='дней'):
     """отправляет кол-во дней до сезона"""
+    now = dt.datetime.now()
     days_left = (zhd - now).days
-    send_msg(id, f"До конца сезона осталось {days_left} дней", attachment='photo-202528897_457239185')
+    send_msg(id, f"До конца сезона осталось {days_left} {sentence_end}", attachment='photo-202528897_457239185')
 
 
-def zhd_left_days(id):
+@end_of_days_wrapper
+def zhd_left_days(id, sentence_end='дней'):
     """отправляет фото ержана с пивом и кол-во дней до зхд"""
     # pictures_zhd = ['photo-202528897_457239152', 'photo-202528897_457239154', 
     #             'photo-202528897_457239153', 'photo-202528897_457239157', 
@@ -53,13 +70,11 @@ def zhd_left_days(id):
 
     now = dt.datetime.now()
     days_left = (zhd - now).days
-    sentence_end = ''
-    send_msg(id, f"До заходского осталось {days_left} дней", attachment='photo-202528897_457239087')
+    send_msg(id, f"До заходского осталось {days_left} {sentence_end}", attachment='photo-202528897_457239087')
 
 
-
-
-def how_much_erjan_working(id):
+@end_of_days_wrapper
+def how_much_erjan_working(id, sentence_end='дней'):
     """пишет количество отработанных ержанном часов без перезапуска"""
     now = dt.datetime.now()
     time_left = now - start_work
@@ -67,9 +82,9 @@ def how_much_erjan_working(id):
     if time_left.days == 0:
         send_msg(id, f'{hour} часов, начальник')
     elif hour == 0:
-        send_msg(id, f'{time_left.days} дней, начальник')
+        send_msg(id, f'{time_left.days} {sentence_end}, начальник')
     else:
-        send_msg(id, f'{time_left.days} дней и {hour} часов, начальник')
+        send_msg(id, f'{time_left.days} {sentence_end} и {hour} часов, начальник')
 
 
 def send_photo_from_folder(id, path):

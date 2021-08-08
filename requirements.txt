@@ -7,3 +7,4 @@ vk-api==11.9.3
 vk-bot==0.6.1
 vk-client==0.2.0
 Wand==0.6.6
+SQLAlchemy==1.4.22

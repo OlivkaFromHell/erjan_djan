@@ -3,13 +3,15 @@ import re
 import requests
 import datetime as dt
 from time import sleep
-from random import randrange, choice
+from random import randrange
+# from time import time
 
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 from weather import current_weather, time_of_sunrise, time_of_sunset
-# from gif_maker import create_gif, shakalize
+from gif_maker import create_gif, shakalize
+import msg_stat
 
 # information files
 from config import token, groupId
@@ -22,7 +24,7 @@ longpoll = VkBotLongPoll(vk_session, groupId)
 
 season = dt.datetime(2021, 8, 29)
 zhd = dt.datetime(2021, 9, 18)
-start_work = dt.datetime.now() # ержан начал работать
+start_work = dt.datetime.now()  # ержан начал работать
 
 
 def send_msg(id, text, attachment=''):
@@ -70,8 +72,8 @@ def season_left_days(id, days_left, sentence_end='дней'):
 @end_of_days_wrapper(zhd)
 def zhd_left_days(id, days_left, sentence_end='дней'):
     """отправляет фото ержана с пивом и кол-во дней до зхд"""
-    # pictures_zhd = ['photo-202528897_457239152', 'photo-202528897_457239154', 
-    #             'photo-202528897_457239153', 'photo-202528897_457239157', 
+    # pictures_zhd = ['photo-202528897_457239152', 'photo-202528897_457239154',
+    #             'photo-202528897_457239153', 'photo-202528897_457239157',
     #             'photo-202528897_457239155', 'photo-202528897_457239156']
 
     send_msg(id, f"До заходского осталось {days_left} {sentence_end}", attachment='photo-202528897_457239087')
@@ -92,7 +94,7 @@ def how_much_erjan_working(id, days_left, sentence_end='дней'):
 
 
 def send_photo_from_folder(id, path):
-    """Загрузка фотографий на vk.UploadServer с сервера и дальнейшая 
+    """Загрузка фотографий на vk.UploadServer с сервера и дальнейшая
     отправка в личные сообщения или чат"""
     server = vk.photos.getMessagesUploadServer()
 
@@ -179,6 +181,50 @@ def send_ultrashakal(id, event):
     send_photo_from_folder(id, 'photo/shakal/shakal.jpg')
 
 
+def get_username(user_id):
+    user_get = vk.users.get(user_ids=(user_id))
+    user_text = user_get[0]
+    fullname = user_text['first_name'] + ' ' + user_text['last_name']
+    return fullname
+
+
+def check_media(event):
+    attachments = event.message['attachments']
+    photo, video, audio, doc = 0, 0, 0, 0
+    audio_msg, sticker = False, False
+    for attach in attachments:
+        if attach['type'] == 'photo':
+            photo += 1
+        elif attach['type'] == 'video':
+            video += 1
+        elif attach['type'] == 'doc':
+            doc += 1
+        elif attach['type'] == 'audio':
+            audio += 1
+        elif attach['type'] == 'audio_message':
+            audio_msg = True
+        elif attach['type'] == 'sticker':
+            sticker = True
+    media = {
+        'photo': photo,
+        'video': video,
+        'doc': doc,
+        'audio': audio,
+        'audio_msg': audio_msg,
+        'sticker': sticker
+    }
+    return media
+
+
+def registr_msg(event):
+    media = check_media(event)
+    user_id = event.obj.message['from_id']
+    userame = get_username(user_id)
+    msg_stat.insert_msg(chat_id=event.chat_id, member_id=user_id, member_name=userame, photo_stat=media['photo'],
+                        audio_stat=media['audio'], doc_stat=media['doc'], video_stat=media['video'],
+                        audio_msg_stat=media['audio_msg'], sticker_stat=media['sticker'])
+
+
 # патерны для поиск в сообщение шаблонов
 patterns = {
     'pattern_phone': r'(?i).*(ержан|джа)?.*(какой|киньт?е?)?.*номер.у?.?\[\w\w(\d+)|.+',
@@ -198,7 +244,7 @@ patterns = {
     'pattern_lenta': r'(?i).*(карт).*(ленты|лента).*',
     'pattern_perek': r'(?i).*(карт).*(перек|перекрест).*',
     'pattern_magnit': r'(?i).*(карт).*(магнит).*',
-    'pattern_okey': r'(?i).*(карт).*(магнит).*',
+    'pattern_okey': r'(?i).*(карт).*(оке).*',
     'pattern_prisma': r'(?i).*(карт).*(призм).*',
     'pattern_sportmaster': r'(?i).*(карт).*(спортмастер).*',
     'pattern_trial_sport': r'(?i).*(карт).*(триал спорт).*',
@@ -221,102 +267,111 @@ while True:
             if event.type == VkBotEventType.MESSAGE_NEW:
                 try:
                     if event.from_chat:
+                        # start_time = time()
                         number = randrange(1, 1000)
-                        id = event.chat_id
+                        chat_id = event.chat_id
+                        user_id = event.obj.message['from_id']
                         msg = str(event.object.message['text'])
-                        id_user = re.match(patterns['pattern_phone'], msg).group(3)
+
+                        registr_msg(event)
 
                         if re.match(patterns['pattern_go'], msg):  # ержана зовут бухать
                             if number < 300:
-                                send_msg(id, 'выезжаю')
+                                send_msg(chat_id, 'выезжаю')
                             elif number < 600:
-                                send_msg(id, 'без деда никуда не пойду')
+                                send_msg(chat_id, 'без деда никуда не пойду')
                             elif number < 900:
-                                send_msg(id, 'погнали')
+                                send_msg(chat_id, 'погнали')
                             elif number > 900:
-                                send_msg(id, 'с дедом хоть на край света')
+                                send_msg(chat_id, 'с дедом хоть на край света')
+
+                        if msg == '!стата':
+                            amout_msg = msg_stat.count_user_msg(chat_id, user_id)
+                            ans = "Статистика за весь период\n" + f"📧 Сообщений: {amout_msg}"
+                            send_msg(chat_id, ans)
 
                         elif (msg == '!погода') or re.match(patterns['pattern_weather'], msg):  # погода
-                            send_msg(id, current_weather())
+                            send_msg(chat_id, current_weather())
 
                         # сколько дней до зхд
                         elif (msg == '!зхд') or re.match(patterns['pattern_days_left_to_zhd'], msg):
-                            zhd_left_days(id)
+                            zhd_left_days(chat_id)
 
                         elif re.match(patterns['pattern_how_many'], msg):  # ищет вопрос сколько
                             if number > 800:
-                                send_msg(id, 'дохуя')
+                                send_msg(chat_id, 'дохуя')
                             else:
-                                send_msg(id, round(number / 10))
+                                send_msg(chat_id, round(number / 10))
 
                         elif msg == 'Ержан, работаешь?':  # проверка бота работоспособность
-                            send_photo(id, 'photo-202528897_457239027')
+                            send_photo(chat_id, 'photo-202528897_457239027')
 
                         elif msg == 'Ержан, который час?':
-                            send_msg(id, 'время пива!')
+                            send_msg(chat_id, 'время пива!')
 
                         elif msg == 'Ержан, давно работаешь?' or msg == '!работа':
-                            how_much_erjan_working(id)
+                            how_much_erjan_working(chat_id)
 
-                        elif id_user and int(id_user) in number_base:  # записываем id
-                            send_msg(id, f"Номер {number_base[int(id_user)][1]}: {number_base[int(id_user)][0]}")
+                        elif re.match(patterns['pattern_phone'], msg).group(3) and\
+                                int(re.match(patterns['pattern_phone'], msg).group(3)) in number_base:  # записываем id
+                            send_msg(chat_id, f"Номер {number_base[int(id_user)][1]}: {number_base[int(id_user)][0]}")
 
                         elif msg == '!сбер' or re.match(patterns['pattern_sber'], msg):
                             ans = f'Да, жду бананы\n\n{sber_card_number}\n{sber_phone_number}'
-                            send_msg(id, ans)
+                            send_msg(chat_id, ans)
 
                         # loyalty cards block
                         elif msg == '!пятерочка' or re.match(patterns['pattern_5'], msg):
                             attachment = random.choice(loyality_cards['5'])
-                            send_msg(id, text='держи, брат', attachment=attachment)
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!перекресток' or msg == '!перек' or re.match(patterns['pattern_perek'], msg):
                             attachment = random.choice(loyality_cards['perek'])
-                            send_msg(id, text='держи, брат', attachment=attachment)
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!лента' or re.match(patterns['pattern_lenta'], msg):
                             attachment = random.choice(loyality_cards['lenta'])
-                            send_msg(id, text='держи, брат', attachment=attachment)
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!магнит' or re.match(patterns['pattern_magnit'], msg):
                             attachment = random.choice(loyality_cards['magnit'])
-                            send_msg(id, text='держи, брат', attachment=attachment)
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!призма' or re.match(patterns['pattern_prisma'], msg):
                             attachment = random.choice(loyality_cards['prisma'])
-                            send_msg(id, text='держи, брат', attachment=attachment)
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!окей' or re.match(patterns['pattern_okey'], msg):
                             attachment = random.choice(loyality_cards['okey'])
-                            send_msg(id, text='держи, брат', attachment=attachment)
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!триал спорт' or re.match(patterns['pattern_trial_sport'], msg):
                             attachment = random.choice(loyality_cards['trial_sport'])
-                            send_msg(id, text='держи, брат', attachment=attachment)
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!спортмастер' or re.match(patterns['pattern_sportmaster'], msg):
                             attachment = random.choice(loyality_cards['sportmaster'])
-                            send_msg(id, text='держи, брат', attachment=attachment)
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
 
                         ##############################################################################
-                        
+
                         elif re.match(patterns['pattern_erjan'], msg):  # ищет вопрос ержану
                             if number < 351:
-                                send_msg(id, 'да')
+                                send_msg(chat_id, 'да')
                             if 350 < number < 701:
-                                send_msg(id, 'нет')
+                                send_msg(chat_id, 'нет')
                             if 700 < number < 751:
-                                send_msg(id, 'мне поебать')
+                                send_msg(chat_id, 'мне поебать')
                             if 750 < number < 801:
-                                send_msg(id, 'суета')
+                                send_msg(chat_id, 'суета')
                             if 800 < number < 821:
-                                send_msg(id, 'один раз не пидорас')
+                                send_msg(chat_id, 'один раз не пидорас')
                             if 820 < number < 851:
-                                send_msg(id, 'узнаешь')
+                                send_msg(chat_id, 'узнаешь')
                             if 850 < number < 856:
-                                send_msg(id, 'я больше не работаю')
+                                send_msg(chat_id, 'я больше не работаю')
                             if 855 < number < 866:
-                                send_msg(id, 'Я, блять, в своём познании настолько преисполнился, \
+                                send_msg(chat_id, 'Я, блять, в своём познании настолько преисполнился, \
                                     что я как будто бы уже 100 триллионов миллиардов лет, блять,\
                                     проживаю на триллионах и триллионах таких же планет, понимаешь?\
                                     Как эта Земля. Мне уже этот мир абсолютно понятен, и я здесь ищу\
                                     только одного: покоя, умиротворения и вот этой гармонии от слияния \
                                     с бесконечно вечным.')
                             if 865 < number < 876:
-                                send_msg(id, 'Как вам сказать… \
+                                send_msg(chat_id, 'Как вам сказать… \
                                     Я прожила довольно долгую жизнь… \
                                     Ибрагим вам что-нибудь говорит?\
                                     Прекрасное имя. Аллах акбар. \
@@ -325,60 +380,64 @@ while True:
                                     И если я ношу кандибобер на голове, это не значит,\
                                     что я женщина или балерина')
                             if 875 < number < 901:
-                                send_msg(id, 'отвечаю')
+                                send_msg(chat_id, 'отвечаю')
                             if 900 < number < 916:
-                                send_msg(id, 'Ахахах, насмешил. Гуляй')
+                                send_msg(chat_id, 'Ахахах, насмешил. Гуляй')
                             if 915 < number < 941:
-                                send_msg(id, 'по-любому, езжи')
+                                send_msg(chat_id, 'по-любому, езжи')
                             if 940 < number < 955:
-                                send_msg(id, 'встану - ты ляжешь')
+                                send_msg(chat_id, 'встану - ты ляжешь')
 
                         elif re.match(patterns['pattern_days_left_to_season'], msg) or msg == '!сезон':
-                            season_left_days(id)
+                            season_left_days(chat_id)
 
                         elif re.match(patterns['pattern_understand'], msg) and number < 300:  # не понял
-                            send_msg(id, 'поймешь')
+                            send_msg(chat_id, 'поймешь')
 
                         elif re.match(patterns['pattern_hui'], msg):  # ержана послали нахуй?
-                            send_msg(id, 'Сам нахуй иди')
+                            send_msg(chat_id, 'Сам нахуй иди')
 
                         elif re.match(patterns['pattern_rso'], msg):  # любим рсо
-                            send_msg(id, 'Я люблю РСО 🏳️‍🌈 🏳️‍🌈 🏳️‍🌈')
+                            send_msg(chat_id, 'Я люблю РСО 🏳️‍🌈 🏳️‍🌈 🏳️‍🌈')
 
                         elif re.match(patterns['pattern_veseloe'], msg):  # Веселое? нет блин грустное
-                            send_msg(id, 'Нет блин грустное')
+                            send_msg(chat_id, 'Нет блин грустное')
 
                         elif (msg == 'Да' or msg == 'да' or msg == 'ДА') and number < 150:
-                            send_msg(id, 'Манда')
+                            send_msg(chat_id, 'Манда')
 
                         elif (msg == 'Нет' or msg == 'нет' or msg == 'НЕТ') and number < 150:
-                            send_msg(id, 'Пидора ответ')
+                            send_msg(chat_id, 'Пидора ответ')
 
                         elif msg == 'Ержан, сделай гифку':
-                            send_gif(id, event)
+                            send_gif(chat_id, event)
 
                         elif msg == 'Ержан, шакализируй' or msg == 'Ержан, шакал':
-                            send_shakal(id, event)
+                            send_shakal(chat_id, event)
 
                         elif msg == 'Ержан, ультрашакал':
-                            send_ultrashakal(id, event)
+                            send_ultrashakal(chat_id, event)
 
                         elif msg == 'Ержан, пиши диплом':
-                            send_photo(id, 'photo-202528897_457239141')
+                            send_photo(chat_id, 'photo-202528897_457239141')
 
                         elif msg == '!восход' or msg == '!рассвет':
-                            send_msg(id, time_of_sunrise())
+                            send_msg(chat_id, time_of_sunrise())
 
                         elif msg == '!заход' or msg == '!закат':
-                            send_msg(id, time_of_sunset())
+                            send_msg(chat_id, time_of_sunset())
 
                         elif msg == '!время':
                             current_time = dt.datetime.now()
                             current_time = current_time.strftime('%H:%M')
-                            send_msg(id, current_time)
+                            send_msg(chat_id, current_time)
 
                         elif msg == 'один раз':  # no comments
-                            send_msg(id, 'не пидорас')
+                            send_msg(chat_id, 'не пидорас')
+
+                        # end_time = time()
+                        # print(f" – Начало операции: {start_time} | Конец операции: {end_time}\n",
+                        #       f"Длительность: {end_time - start_time}\n", '_______________________')
                 except Exception as e:
                     print(e)
 

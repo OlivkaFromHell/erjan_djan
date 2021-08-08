@@ -33,6 +33,7 @@ class ConversationMember(Conversation):
 
 a = ConversationMember(1, 'helsso', 123, 'rashid')
 print(a.__dict__)
+a = 'priver'
 
 if __name__ == '__main__':
     print('hello')

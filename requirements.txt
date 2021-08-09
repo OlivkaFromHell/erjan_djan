@@ -8,3 +8,4 @@ vk-bot==0.6.1
 vk-client==0.2.0
 Wand==0.6.6
 SQLAlchemy==1.4.22
+psycopg2==2.9.1

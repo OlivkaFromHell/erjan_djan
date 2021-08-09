@@ -287,7 +287,11 @@ while True:
 
                         if msg == '!стата':
                             amout_msg = msg_stat.count_user_msg(chat_id, user_id)
-                            ans = "Статистика за весь период\n" + f"📧 Сообщений: {amout_msg}"
+                            ans = "Твоя активность за весь период\n" + f"📧 Сообщений: {amout_msg}"
+                            send_msg(chat_id, ans)
+
+                        elif msg == '!статистика':
+                            ans = msg_stat.get_chat_statistic(chat_id)
                             send_msg(chat_id, ans)
 
                         elif (msg == '!погода') or re.match(patterns['pattern_weather'], msg):  # погода
@@ -439,7 +443,7 @@ while True:
                         # print(f" – Начало операции: {start_time} | Конец операции: {end_time}\n",
                         #       f"Длительность: {end_time - start_time}\n", '_______________________')
                 except Exception as e:
-                    print(e)
+                    pass
 
     except Exception:
         send_msg(1, 'Сервер перезагрузился')

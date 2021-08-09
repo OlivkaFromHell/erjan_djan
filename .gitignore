@@ -10,3 +10,4 @@ gif/
 __pycache__/
 data/
 loyality_cards/
+venv/

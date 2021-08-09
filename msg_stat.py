@@ -86,7 +86,7 @@ def find_top_5_users(chat_id):
             top = session.query(Conversation.member_name, Conversation.member_id,
                                 func.count().label('top')) \
                 .filter_by(chat_id=chat_id).group_by(Conversation.member_name, Conversation.member_id) \
-                .order_by(func.count().label('top').desc()).limit(5)
+                .order_by(func.count().label('top').desc()).limit(5).all()
     return top
 
 
@@ -94,11 +94,11 @@ def get_chat_statistic(chat_id):
     with Session() as session:
         with session.begin():
             count_msg = session.query(Conversation).filter_by(chat_id=chat_id).count()
+            photo = session.query(Conversation).filter_by(chat_id=chat_id).filter(Conversation.photo != 0).count()
+            audio = session.query(Conversation).filter_by(chat_id=chat_id).filter(Conversation.audio != 0).count()
+            video = session.query(Conversation).filter_by(chat_id=chat_id).filter(Conversation.video != 0).count()
+            doc = session.query(Conversation).filter_by(chat_id=chat_id).filter(Conversation.doc != 0).count()
             audio_msg = session.query(Conversation).filter_by(chat_id=chat_id, audio_msg=True).count()
-            photo = session.query(Conversation).filter_by(chat_id=chat_id, photo=True).count()
-            audio = session.query(Conversation).filter_by(chat_id=chat_id, audio=True).count()
-            video = session.query(Conversation).filter_by(chat_id=chat_id, video=True).count()
-            doc = session.query(Conversation).filter_by(chat_id=chat_id, video=True).count()
             sticker = session.query(Conversation).filter_by(chat_id=chat_id, sticker=True).count()
 
     chat_stat = """Статистика за весь период
@@ -108,12 +108,20 @@ def get_chat_statistic(chat_id):
 🎧 Аудио: {audio}
 📹 Видео: {video}
 📑 Документов: {doc}
-💩 Стикеров: {sticker}
+🐱 Стикеров: {sticker}
 """.format(count_msg=count_msg, audio_msg=audio_msg,
            photo=photo, audio=audio, video=video, doc=doc, sticker=sticker)
+    text_top5 = 'Самые активные пользователи:\n'
+    top5 = find_top_5_users(chat_id)
+    for ind, user in enumerate(top5):
+        text = f"{ind+1}. {user[0]} – {user[2]}\n"
+        text_top5 += text
+
+    chat_stat += text_top5
+
     return chat_stat
 
 
 if __name__ == "__main__":
-    res = check_registration(1231, 129)
+    res = get_chat_statistic(2)
     print(res)

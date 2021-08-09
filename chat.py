@@ -286,8 +286,7 @@ while True:
                                 send_msg(chat_id, 'с дедом хоть на край света')
 
                         if msg == '!стата':
-                            amout_msg = msg_stat.count_user_msg(chat_id, user_id)
-                            ans = "Твоя активность за весь период\n" + f"📧 Сообщений: {amout_msg}"
+                            ans = msg_stat.get_user_statistic(chat_id, user_id)
                             send_msg(chat_id, ans)
 
                         elif msg == '!статистика':

@@ -66,20 +66,6 @@ def check_registration(chat_id, user_id):
     return False
 
 
-def count_user_msg(chat_id, member_id):
-    with Session() as session:
-        with session.begin():
-            res = session.query(Conversation).filter_by(chat_id=chat_id, member_id=member_id).count()
-    return res
-
-
-def count_conversation_msg(chat_id):
-    with Session() as session:
-        with session.begin():
-            res = session.query(Conversation).filter_by(chat_id=chat_id).count()
-    return res
-
-
 def find_top_5_users(chat_id):
     with Session() as session:
         with session.begin():
@@ -108,7 +94,7 @@ def get_chat_statistic(chat_id):
 🎧 Аудио: {audio}
 📹 Видео: {video}
 📑 Документов: {doc}
-🐱 Стикеров: {sticker}
+🐱 Стикеров: {sticker}\n
 """.format(count_msg=count_msg, audio_msg=audio_msg,
            photo=photo, audio=audio, video=video, doc=doc, sticker=sticker)
     text_top5 = 'Самые активные пользователи:\n'
@@ -121,7 +107,34 @@ def get_chat_statistic(chat_id):
 
     return chat_stat
 
+def get_user_statistic(chat_id, user_id):
+    with Session() as session:
+        with session.begin():
+            count_msg = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id).count()
+            photo = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id)\
+                .filter(Conversation.photo != 0).count()
+            audio = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id)\
+                .filter(Conversation.audio != 0).count()
+            video = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id)\
+                .filter(Conversation.video != 0).count()
+            doc = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id)\
+                .filter(Conversation.doc != 0).count()
+            audio_msg = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id, audio_msg=True).count()
+            sticker = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id, sticker=True).count()
+
+    user_stat = """Твоя статистика за весь период
+📧 Сообщений: {count_msg}
+🎵 Голосовых: {audio_msg}
+📷 Фото: {photo}
+🎧 Аудио: {audio}
+📹 Видео: {video}
+📑 Документов: {doc}
+🐱 Стикеров: {sticker}\n
+""".format(count_msg=count_msg, audio_msg=audio_msg,
+           photo=photo, audio=audio, video=video, doc=doc, sticker=sticker)
+
+    return user_stat
 
 if __name__ == "__main__":
-    res = get_chat_statistic(2)
+    res = get_user_statistic(1, 136833224)
     print(res)

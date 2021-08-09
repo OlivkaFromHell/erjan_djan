@@ -10,7 +10,7 @@ import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 from weather import current_weather, time_of_sunrise, time_of_sunset
-from gif_maker import create_gif, shakalize
+# from gif_maker import create_gif, shakalize
 import msg_stat
 
 # information files
@@ -27,13 +27,14 @@ zhd = dt.datetime(2021, 9, 18)
 start_work = dt.datetime.now()  # ержан начал работать
 
 
-def send_msg(id, text, attachment=''):
+def send_msg(id, text='', attachment='', disable_mentions=True):
     sleep(0.5)
     return vk_session.method("messages.send",
                              {'chat_id': id,
                               'message': text,
                               'attachment': attachment,
-                              'random_id': 0})
+                              'random_id': 0,
+                              'disable_mentions': int(disable_mentions)})
 
 
 def send_photo(id, attachment):
@@ -59,7 +60,9 @@ def end_of_days_wrapper(date):
             else:
                 sentence_end = 'дней'
             return func(id, days_left, sentence_end=sentence_end)
+
         return wrapper
+
     return decorator
 
 
@@ -300,13 +303,15 @@ while True:
                         elif (msg == '!зхд') or re.match(patterns['pattern_days_left_to_zhd'], msg):
                             zhd_left_days(chat_id)
 
-                        elif re.match(patterns['pattern_how_many'], msg):  # ищет вопрос сколько
+                        # ищет вопрос сколько
+                        elif re.match(patterns['pattern_how_many'], msg):
                             if number > 800:
                                 send_msg(chat_id, 'дохуя')
                             else:
                                 send_msg(chat_id, round(number / 10))
 
-                        elif msg == 'Ержан, работаешь?':  # проверка бота работоспособность
+                        # проверка бота работоспособность
+                        elif msg == 'Ержан, работаешь?':
                             send_photo(chat_id, 'photo-202528897_457239027')
 
                         elif msg == 'Ержан, который час?':
@@ -315,9 +320,10 @@ while True:
                         elif msg == 'Ержан, давно работаешь?' or msg == '!работа':
                             how_much_erjan_working(chat_id)
 
-                        elif re.match(patterns['pattern_phone'], msg).group(3) and\
+                        # поиск запроса на выдачу номера телефона
+                        elif re.match(patterns['pattern_phone'], msg).group(3) and \
                                 int(re.match(patterns['pattern_phone'], msg).group(3)) in number_base:  # записываем id
-                            send_msg(chat_id, f"Номер {number_base[int(id_user)][1]}: {number_base[int(id_user)][0]}")
+                            send_msg(chat_id, f"Номер *id{user_id}({number_base[int(user_id)][1]}): {number_base[int(user_id)][0]}")
 
                         elif msg == '!сбер' or re.match(patterns['pattern_sber'], msg):
                             ans = f'Да, жду бананы\n\n{sber_card_number}\n{sber_phone_number}'

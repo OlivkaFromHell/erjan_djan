@@ -1,5 +1,6 @@
 config.py
 info.py
+vk_bot_test.py
 data/
 beta/
 __pycache__/

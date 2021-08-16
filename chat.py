@@ -330,7 +330,7 @@ while True:
                             send_msg(chat_id, ans)
 
                         # loyalty cards block
-                        elif msg == '!пятерочка' or re.match(patterns['pattern_5'], msg):
+                        elif msg == '!пятерочка' or msg == '!пятёрочка' or re.match(patterns['pattern_5'], msg):
                             attachment = random.choice(loyality_cards['5'])
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!перекресток' or msg == '!перек' or re.match(patterns['pattern_perek'], msg):

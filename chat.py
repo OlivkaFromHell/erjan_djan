@@ -22,8 +22,8 @@ vk = vk_session.get_api()
 groupId = groupId
 longpoll = VkBotLongPoll(vk_session, groupId)
 
-season = dt.datetime(2021, 8, 29)
-zhd = dt.datetime(2021, 9, 18)
+season = dt.datetime(2022, 7, 7)
+zhd = dt.datetime(2022, 5, 21)
 start_work = dt.datetime.now()  # ержан начал работать
 
 
@@ -69,7 +69,7 @@ def end_of_days_wrapper(date):
 @end_of_days_wrapper(season)
 def season_left_days(id, days_left, sentence_end='дней'):
     """отправляет кол-во дней до сезона"""
-    send_msg(id, f"До конца сезона осталось {days_left} {sentence_end}", attachment='photo-202528897_457239185')
+    send_msg(id, f"До сезона осталось {days_left} {sentence_end}", attachment='photo-202528897_457239196')
 
 
 @end_of_days_wrapper(zhd)
@@ -251,6 +251,8 @@ patterns = {
     'pattern_prisma': r'(?i).*(карт).*(призм).*',
     'pattern_sportmaster': r'(?i).*(карт).*(спортмастер).*',
     'pattern_trial_sport': r'(?i).*(карт).*(триал спорт).*',
+    'pattern_maksidom': r'(?i).*(карт).*(максидом).*',
+    'pattern_diksi': r'(?i).*(карт).*(дикси).*',
 }
 
 loyality_cards = {
@@ -262,6 +264,9 @@ loyality_cards = {
     'prisma': ['photo-202528897_457239174'],
     'sportmaster': ['photo-202528897_457239176'],
     'trial_sport': ['photo-202528897_457239177'],
+    'maksidom': ['photo-202528897_457239194'],
+    'diksi': ['photo-202528897_457239195'],
+
 }
 
 while True:
@@ -323,7 +328,10 @@ while True:
                         # поиск запроса на выдачу номера телефона
                         elif re.match(patterns['pattern_phone'], msg).group(3) and \
                                 int(re.match(patterns['pattern_phone'], msg).group(3)) in number_base:  # записываем id
-                            send_msg(chat_id, f"Номер *id{user_id}({number_base[int(user_id)][1]}): {number_base[int(user_id)][0]}")
+                            user_id_phone = int(re.match(patterns['pattern_phone'], msg).group(3))
+                            send_msg(chat_id,
+                                     f"Номер *id{user_id_phone}({number_base[user_id_phone][1]}):"
+                                     f" {number_base[user_id_phone][0]}")
 
                         elif msg == '!сбер' or re.match(patterns['pattern_sber'], msg):
                             ans = f'Да, жду бананы\n\n{sber_card_number}\n{sber_phone_number}'
@@ -350,6 +358,12 @@ while True:
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!триал спорт' or re.match(patterns['pattern_trial_sport'], msg):
                             attachment = random.choice(loyality_cards['trial_sport'])
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
+                        elif msg == '!максидом' or re.match(patterns['pattern_maksidom'], msg):
+                            attachment = random.choice(loyality_cards['maksidom'])
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
+                        elif msg == '!дикси' or re.match(patterns['pattern_diksi'], msg):
+                            attachment = random.choice(loyality_cards['diksi'])
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!спортмастер' or re.match(patterns['pattern_sportmaster'], msg):
                             attachment = random.choice(loyality_cards['sportmaster'])

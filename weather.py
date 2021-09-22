@@ -14,10 +14,11 @@ text_to_emoji = {
     'туман': '🌫'
 }
 
+
 def get_forecast_data():
     """send current weather and weather description"""
     api_url = 'http://api.openweathermap.org/data/2.5/forecast'
-    s_city = "Судак"
+    s_city = "Санкт-Петербург"
     appid = 'a1e9cd07fa2f720fa36b7a5870f75f66'
 
     params = {
@@ -31,6 +32,7 @@ def get_forecast_data():
 
     return res.json()
 
+
 def convert_temp_descript(data):
     temperature = round(data['main']['temp'])
     weather_description = data['weather'][0]['description']
@@ -43,6 +45,7 @@ def convert_temp_descript(data):
 
     return [temperature, weather_description_emoji, data['clouds']['all']]
 
+
 def time_of_sunrise(data=get_forecast_data()):
     sunrise = datetime.fromtimestamp(data['city']['sunrise'])
     if sunrise.minute // 10 == 0:
@@ -51,6 +54,7 @@ def time_of_sunrise(data=get_forecast_data()):
         sunrise_time = f"🌅  {sunrise.hour}:{sunrise.minute}"
 
     return sunrise_time
+
 
 def time_of_sunset(data=get_forecast_data()):
     sunset = datetime.fromtimestamp(data['city']['sunset'])
@@ -61,10 +65,11 @@ def time_of_sunset(data=get_forecast_data()):
 
     return sunset_time
 
+
 def current_weather():
     """send current weather and weather description"""
     api_url = 'http://api.openweathermap.org/data/2.5/weather'
-    s_city = "Судак"
+    s_city = "Санкт-Петербург"
     city_id = 0
     appid = 'a1e9cd07fa2f720fa36b7a5870f75f66'
 
@@ -78,7 +83,7 @@ def current_weather():
     res = requests.get(api_url, params=params)
 
     data = res.json()
-    template = 'Сейчас в Веселом {}°С | {} \nОблачность: {}%'
+    template = 'Сейчас на улице {}°С | {} \nОблачность: {}%'
     temperature = round(data['main']['temp'])
     weather_description = data['weather'][0]['description']
     if weather_description in text_to_emoji:
@@ -91,10 +96,11 @@ def current_weather():
 
     return ans
 
+
 def for_day_weather():
     """send current weather and weather description"""
     api_url = 'http://api.openweathermap.org/data/2.5/forecast'
-    s_city = "Судак"
+    s_city = "Санкт-Петербург"
     city_id = 0
     appid = 'a1e9cd07fa2f720fa36b7a5870f75f66'
 
@@ -117,9 +123,8 @@ def for_day_weather():
 
     ans = 'Доброе утро!\n'
 
-    
     daily_morning = data['list'][0]
-    template = 'Сейчас в Веселом {}°С | {}\n'
+    template = 'Сейчас на улице {}°С | {}\n'
     tem = convert_temp_descript(daily_morning)
     ans += template.format(tem[0], tem[1])
 
@@ -141,6 +146,7 @@ def for_day_weather():
     ans += sun_time
 
     return ans
+
 
 if __name__ == '__main__':
     print(current_weather())

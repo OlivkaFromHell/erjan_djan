@@ -76,6 +76,17 @@ def find_top_5_users(chat_id):
     return top
 
 
+def find_top_5_users_week(chat_id, week_ago):
+    with Session() as session:
+        with session.begin():
+            top = session.query(Conversation.member_name, Conversation.member_id,
+                                func.count().label('top')) \
+                .filter_by(chat_id=chat_id).filter(Conversation.current_date > week_ago)\
+                .group_by(Conversation.member_name, Conversation.member_id) \
+                .order_by(func.count().label('top').desc()).limit(5).all()
+    return top
+
+
 def get_chat_statistic(chat_id):
     with Session() as session:
         with session.begin():
@@ -87,20 +98,21 @@ def get_chat_statistic(chat_id):
             audio_msg = session.query(Conversation).filter_by(chat_id=chat_id, audio_msg=True).count()
             sticker = session.query(Conversation).filter_by(chat_id=chat_id, sticker=True).count()
 
-    chat_stat = """Статистика за весь период
-📧 Сообщений: {count_msg}
-🎵 Голосовых: {audio_msg}
-📷 Фото: {photo}
-🎧 Аудио: {audio}
-📹 Видео: {video}
-📑 Документов: {doc}
-🐱 Стикеров: {sticker}\n
-""".format(count_msg=count_msg, audio_msg=audio_msg,
-           photo=photo, audio=audio, video=video, doc=doc, sticker=sticker)
+    chat_stat = (f'Статистика за неделю\n'
+                 f'📧 Сообщений: {count_msg}\n'
+                 f'🎵 Голосовых: {audio_msg}\n'
+                 f'📷 Фото: {photo}\n'
+                 f'🎧 Аудио: {audio}\n'
+                 f'📹 Видео: {video}\n'
+                 f'📑 Документов: {doc}\n'
+                 f'🐱 Стикеров: {sticker}\n').format(count_msg=count_msg, audio_msg=audio_msg,
+                                                     photo=photo, audio=audio, video=video,
+                                                     doc=doc, sticker=sticker)
+
     text_top5 = 'Самые активные пользователи:\n'
     top5 = find_top_5_users(chat_id)
     for ind, user in enumerate(top5):
-        text = f"{ind+1}. {user[0]} – {user[2]}\n"
+        text = f"{ind + 1}. {user[0]} – {user[2]}\n"
         text_top5 += text
 
     chat_stat += text_top5
@@ -112,15 +124,16 @@ def get_user_statistic(chat_id, user_id):
     with Session() as session:
         with session.begin():
             count_msg = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id).count()
-            photo = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id)\
+            photo = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id) \
                 .filter(Conversation.photo != 0).count()
-            audio = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id)\
+            audio = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id) \
                 .filter(Conversation.audio != 0).count()
-            video = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id)\
+            video = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id) \
                 .filter(Conversation.video != 0).count()
-            doc = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id)\
+            doc = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id) \
                 .filter(Conversation.doc != 0).count()
-            audio_msg = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id, audio_msg=True).count()
+            audio_msg = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id,
+                                                              audio_msg=True).count()
             sticker = session.query(Conversation).filter_by(chat_id=chat_id, member_id=user_id, sticker=True).count()
 
     user_stat = """Твоя статистика за весь период
@@ -140,35 +153,44 @@ def get_user_statistic(chat_id, user_id):
 def get_chat_statistic_week(chat_id):
     with Session() as session:
         with session.begin():
-            count_msg = session.query(Conversation).filter_by(chat_id=chat_id).count()
-            photo = session.query(Conversation).filter_by(chat_id=chat_id).filter(Conversation.photo != 0).count()
-            audio = session.query(Conversation).filter_by(chat_id=chat_id).filter(Conversation.audio != 0).count()
-            video = session.query(Conversation).filter_by(chat_id=chat_id).filter(Conversation.video != 0).count()
-            doc = session.query(Conversation).filter_by(chat_id=chat_id).filter(Conversation.doc != 0).count()
-            audio_msg = session.query(Conversation).filter_by(chat_id=chat_id, audio_msg=True).count()
-            sticker = session.query(Conversation).filter_by(chat_id=chat_id, sticker=True).count()
+            now = datetime.datetime.now()
+            week_ago = now - datetime.timedelta(days=7)
+            count_msg = session.query(Conversation)\
+                .filter_by(chat_id=chat_id).filter(Conversation.current_date > week_ago).count()
+            photo = session.query(Conversation).\
+                filter_by(chat_id=chat_id).filter(Conversation.photo != 0, Conversation.current_date > week_ago).count()
+            audio = session.query(Conversation)\
+                .filter_by(chat_id=chat_id).filter(Conversation.audio != 0, Conversation.current_date > week_ago).count()
+            video = session.query(Conversation)\
+                .filter_by(chat_id=chat_id).filter(Conversation.video != 0, Conversation.current_date > week_ago).count()
+            doc = session.query(Conversation)\
+                .filter_by(chat_id=chat_id).filter(Conversation.doc != 0, Conversation.current_date > week_ago).count()
+            audio_msg = session.query(Conversation)\
+                .filter_by(chat_id=chat_id, audio_msg=True).filter(Conversation.current_date > week_ago).count()
+            sticker = session.query(Conversation)\
+                .filter_by(chat_id=chat_id, sticker=True).filter(Conversation.current_date > week_ago).count()
 
-    chat_stat = """Статистика за неделю
-    📧 Сообщений: {count_msg}
-    🎵 Голосовых: {audio_msg}
-    📷 Фото: {photo}
-    🎧 Аудио: {audio}
-    📹 Видео: {video}
-    📑 Документов: {doc}
-    🐱 Стикеров: {sticker}\n
-    """.format(count_msg=count_msg, audio_msg=audio_msg,
-               photo=photo, audio=audio, video=video, doc=doc, sticker=sticker)
+    chat_stat_week = (f'Статистика за неделю\n'
+                 f'📧 Сообщений: {count_msg}\n'
+                 f'🎵 Голосовых: {audio_msg}\n'
+                 f'📷 Фото: {photo}\n'
+                 f'🎧 Аудио: {audio}\n'
+                 f'📹 Видео: {video}\n'
+                 f'📑 Документов: {doc}\n'
+                 f'🐱 Стикеров: {sticker}\n').format(count_msg=count_msg, audio_msg=audio_msg,
+                                                     photo=photo, audio=audio, video=video,
+                                                     doc=doc, sticker=sticker)
     text_top5 = 'Самые активные пользователи:\n'
-    top5 = find_top_5_users(chat_id)
+    top5 = find_top_5_users_week(chat_id, week_ago)
     for ind, user in enumerate(top5):
         text = f"{ind + 1}. {user[0]} – {user[2]}\n"
         text_top5 += text
 
-    chat_stat += text_top5
+    chat_stat_week += text_top5
 
-    return chat_stat
+    return chat_stat_week
 
 
 if __name__ == "__main__":
-    res = get_user_statistic(1, 136833224)
+    res = get_chat_statistic_week(2)
     print(res)

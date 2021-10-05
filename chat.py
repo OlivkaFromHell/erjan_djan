@@ -301,6 +301,10 @@ while True:
                             ans = msg_stat.get_chat_statistic(chat_id)
                             send_msg(chat_id, ans)
 
+                        elif msg == '!статистика неделя':
+                            ans = msg_stat.get_chat_statistic_week(chat_id)
+                            send_msg(chat_id, ans)
+
                         elif (msg == '!погода') or re.match(patterns['pattern_weather'], msg):  # погода
                             send_msg(chat_id, current_weather())
 
@@ -338,7 +342,8 @@ while True:
                             send_msg(chat_id, ans)
 
                         # loyalty cards block
-                        elif msg == '!пятерочка' or msg == '!пятёрочка' or re.match(patterns['pattern_5'], msg):
+                        elif msg == '!пятерочка' or msg == '!пятёрочка' or msg == '!5' \
+                                or re.match(patterns['pattern_5'], msg):
                             attachment = random.choice(loyality_cards['5'])
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!перекресток' or msg == '!перек' or re.match(patterns['pattern_perek'], msg):
@@ -451,9 +456,12 @@ while True:
                             send_msg(chat_id, time_of_sunset())
 
                         elif msg == '!время':
-                            current_time = dt.datetime.now()
-                            current_time = current_time.strftime('%H:%M')
-                            send_msg(chat_id, current_time)
+                            if user_id == 174135331 and number <= 50:
+                                send_msg(chat_id, 'Время учить уроки, Софа!')
+                            else:
+                                current_time = dt.datetime.now()
+                                current_time = current_time.strftime('%H:%M')
+                                send_msg(chat_id, current_time)
 
                         elif msg == 'один раз':  # no comments
                             send_msg(chat_id, 'не пидорас')

@@ -9,9 +9,9 @@ from weather import for_day_weather
 def send_msg(id, text):
     sleep(0.5)
     return vk_session.method("messages.send",
-            {'chat_id': id,
-             'message': text,
-             "random_id": 0})
+                             {'chat_id': id,
+                              'message': text,
+                              "random_id": 0})
 
 
 def send_weather():

@@ -3,14 +3,15 @@ import re
 import requests
 import datetime as dt
 from time import sleep
-from random import randrange
+from random import randrange, randint
+from bs4 import BeautifulSoup
 # from time import time
 
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 from weather import current_weather, time_of_sunrise, time_of_sunset
-# from gif_maker import create_gif, shakalize
+from gif_maker import create_gif, shakalize
 import msg_stat
 
 # information files
@@ -24,6 +25,7 @@ longpoll = VkBotLongPoll(vk_session, groupId)
 
 season = dt.datetime(2022, 7, 7)
 zhd = dt.datetime(2022, 5, 21)
+kandosi = dt.datetime(2022, 2, 17)
 start_work = dt.datetime.now()  # ержан начал работать
 
 
@@ -163,6 +165,21 @@ def send_shakal(id, event):
 
     shakalize('photo/shakal/pic.jpg')
     send_photo_from_folder(id, 'photo/shakal/shakal.jpg')
+
+
+def send_joke(id):
+    month = random.randint(1, 12)
+    year = random.randint(2005, 2021)
+    url = f'https://bash.im/best/{year}/{month}'
+
+    page = requests.get(url)
+    soup = BeautifulSoup(page.text, "html.parser")
+    jokes = soup.findAll('div', class_='quote__body')
+    b_joke = repr(jokes[0]).replace('<br/>', '\n')
+    first_line = b_joke.find('\n') + 7
+    last_line = b_joke.find('          </div>') - 1
+
+    send_msg(id, text=b_joke[first_line:last_line])
 
 
 def send_ultrashakal(id, event):
@@ -340,6 +357,9 @@ while True:
                         elif msg == '!сбер' or re.match(patterns['pattern_sber'], msg):
                             ans = f'Да, жду бананы\n\n{sber_card_number}\n{sber_phone_number}'
                             send_msg(chat_id, ans)
+
+                        elif msg == '!анек':
+                            send_joke(chat_id)
 
                         # loyalty cards block
                         elif msg == '!пятерочка' or msg == '!пятёрочка' or msg == '!5' \

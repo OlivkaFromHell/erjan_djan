@@ -11,7 +11,7 @@ import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 from weather import current_weather, time_of_sunrise, time_of_sunset
-from gif_maker import create_gif, shakalize
+# from gif_maker import create_gif, shakalize
 import msg_stat
 
 # information files
@@ -270,6 +270,10 @@ patterns = {
     'pattern_trial_sport': r'(?i).*(карт).*(триал спорт).*',
     'pattern_maksidom': r'(?i).*(карт).*(максидом).*',
     'pattern_diksi': r'(?i).*(карт).*(дикси).*',
+    'pattern_spar': r'(?i).*(карт).*(спар).*',
+    'pattern_auchan': r'(?i).*(карт).*(ашан).*',
+    'pattern_letual': r'(?i).*(карт).*(летуал).*',
+    'pattern_fix_price': r'(?i).*(карт).*(фикс прайс).*',
 }
 
 loyality_cards = {
@@ -282,8 +286,10 @@ loyality_cards = {
     'sportmaster': ['photo-202528897_457239176'],
     'trial_sport': ['photo-202528897_457239177'],
     'maksidom': ['photo-202528897_457239194'],
-    'diksi': ['photo-202528897_457239195'],
-
+    'spar': ['photo-202528897_457239198'],
+    'auchan': ['photo-202528897_457239200'],
+    'letual': ['photo-202528897_457239201'],
+    'fix_price': ['photo-202528897_457239202'],
 }
 
 while True:
@@ -392,6 +398,18 @@ while True:
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!спортмастер' or re.match(patterns['pattern_sportmaster'], msg):
                             attachment = random.choice(loyality_cards['sportmaster'])
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
+                        elif msg == '!спар' or re.match(patterns['pattern_spar'], msg):
+                            attachment = random.choice(loyality_cards['spar'])
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
+                        elif msg == '!ашан' or re.match(patterns['pattern_auchan'], msg):
+                            attachment = random.choice(loyality_cards['auchan'])
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
+                        elif msg == '!фикс прайс' or msg == '!фикспрайс' or re.match(patterns['pattern_sportmaster'], msg):
+                            attachment = random.choice(loyality_cards['fix_price'])
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
+                        elif msg == '!летуаль' or re.match(patterns['pattern_letual'], msg):
+                            attachment = random.choice(loyality_cards['letual'])
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
 
                         ##############################################################################

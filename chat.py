@@ -274,6 +274,7 @@ patterns = {
     'pattern_auchan': r'(?i).*(карт).*(ашан).*',
     'pattern_letual': r'(?i).*(карт).*(летуал).*',
     'pattern_fix_price': r'(?i).*(карт).*(фикс прайс).*',
+    'pattern_riv_gosh': r'(?i).*(карт).*(рив гош).*',
 }
 
 loyality_cards = {
@@ -290,6 +291,7 @@ loyality_cards = {
     'auchan': ['photo-202528897_457239200'],
     'letual': ['photo-202528897_457239201'],
     'fix_price': ['photo-202528897_457239202'],
+    'riv_gosh': ['photo-202528897_457239204'],
 }
 
 while True:
@@ -410,6 +412,9 @@ while True:
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
                         elif msg == '!летуаль' or re.match(patterns['pattern_letual'], msg):
                             attachment = random.choice(loyality_cards['letual'])
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
+                        elif msg == '!ривгош' or re.match(patterns['pattern_riv_gosh'], msg):
+                            attachment = random.choice(loyality_cards['riv_gosh'])
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
 
                         ##############################################################################

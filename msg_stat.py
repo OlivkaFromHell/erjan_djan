@@ -98,7 +98,7 @@ def get_chat_statistic(chat_id):
             audio_msg = session.query(Conversation).filter_by(chat_id=chat_id, audio_msg=True).count()
             sticker = session.query(Conversation).filter_by(chat_id=chat_id, sticker=True).count()
 
-    chat_stat = (f'Статистика за неделю\n'
+    chat_stat = (f'Статистика за весь период\n'
                  f'📧 Сообщений: {count_msg}\n'
                  f'🎵 Голосовых: {audio_msg}\n'
                  f'📷 Фото: {photo}\n'

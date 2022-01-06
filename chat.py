@@ -275,6 +275,8 @@ patterns = {
     'pattern_letual': r'(?i).*(карт).*(летуал).*',
     'pattern_fix_price': r'(?i).*(карт).*(фикс прайс).*',
     'pattern_riv_gosh': r'(?i).*(карт).*(рив гош).*',
+    'pattern_pink_rabbit': r'(?i).*(карт).*(розового кролика).*',
+    'pattern_hmel_solod': r'(?i).*(карт).*(хмель и солод).*',
 }
 
 loyality_cards = {
@@ -287,11 +289,14 @@ loyality_cards = {
     'sportmaster': ['photo-202528897_457239176'],
     'trial_sport': ['photo-202528897_457239177'],
     'maksidom': ['photo-202528897_457239194'],
+    'diksi': ['photo-202528897_457239195'],
     'spar': ['photo-202528897_457239198'],
     'auchan': ['photo-202528897_457239200'],
     'letual': ['photo-202528897_457239201'],
     'fix_price': ['photo-202528897_457239202'],
     'riv_gosh': ['photo-202528897_457239204'],
+    'pink_rabbit': ['photo-202528897_457239207'],
+    'hmel_solod': ['photo-202528897_457239206'],
 }
 
 while True:
@@ -416,8 +421,36 @@ while True:
                         elif msg == '!ривгош' or re.match(patterns['pattern_riv_gosh'], msg):
                             attachment = random.choice(loyality_cards['riv_gosh'])
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
+                        elif msg == '!розовый кролик' or re.match(patterns['pattern_pink_rabbit'], msg):
+                            attachment = random.choice(loyality_cards['pink_rabbit'])
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
+                        elif msg == '!хмель и солод' or re.match(patterns['pattern_hmel_solod'], msg):
+                            attachment = random.choice(loyality_cards['hmel_solod'])
+                            send_msg(chat_id, text='держи, брат', attachment=attachment)
 
                         ##############################################################################
+
+                        elif msg in ('!help', '!хелп', '!памагите') or re.match(r'(?i).*(ержан).*(че|что умеешь).*'):
+                            cards = '\n'.join(loyality_cards)
+
+                            to_return = 'Список команд:\n' \
+                                        '!погода\n' \
+                                        '!рассвет\n' \
+                                        '!закат\n' \
+                                        '!время – текущее время\n' \
+                                        '!анек – рассказываю худщие анеки рунета\n' \
+                                        '!зхд – осталось дней до зхд\n' \
+                                        '!сезон – осталось дней до сезона\n' \
+                                        '!работа – прошло времени с последнего запуска ержана на сервере\n\n' \
+                                        'А также:\n' \
+                                        'Подскажу номер братка(есть только бойцы Джа)\n' \
+                                        'Гений математики, способный высчитать что угодно. Cпроси сколько...\n' \
+                                        'Отвечаю на любые вопросы, заданные мне\n' \
+                                        'Выезжаю на разборки\n\n' \
+                                        'Список магазинов в базе:\n' \
+                                        f'{cards}' \
+
+                            send_msg(chat_id, to_return)
 
                         elif re.match(patterns['pattern_erjan'], msg):  # ищет вопрос ержану
                             if number < 351:

@@ -12,7 +12,7 @@ vk = vk_session.get_api()
 groupId = 202528897  # id беседы Джа 20
 
 
-def change_chat_name(title, chat_id):  # функция меняет название беседы
+def change_chat_name(title, chat_id): 
     return vk_session.method('messages.editChat',
                              {'chat_id': chat_id, 'title': title})
 

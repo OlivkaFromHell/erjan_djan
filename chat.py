@@ -253,7 +253,7 @@ patterns = {
     'pattern_erjan': r'(?i).*ержан.*\?$',
     'pattern_understand': r'(?i).*не понял\.?$',
     'pattern_hui': r'(?i).*иди нахуй$',
-    'pattern_how_many': r'(?i).*сколько.*',
+    'pattern_how_many': r'(?i).* сколько.*',
     'pattern_go': r'(?i).*ержан.* (го|погнали|пойдем|пошли).*',
     'pattern_rso': r'(?i).*труд.*',
     'pattern_weather': r'(?i).*ержан.*погода.*',
@@ -421,16 +421,16 @@ while True:
                         elif msg == '!ривгош' or re.match(patterns['pattern_riv_gosh'], msg):
                             attachment = random.choice(loyality_cards['riv_gosh'])
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
-                        elif msg == '!розовый кролик' or re.match(patterns['pattern_pink_rabbit'], msg):
+                        elif msg == '!розовый кролик' or msg == '!рк' or re.match(patterns['pattern_pink_rabbit'], msg):
                             attachment = random.choice(loyality_cards['pink_rabbit'])
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
-                        elif msg == '!хмель и солод' or re.match(patterns['pattern_hmel_solod'], msg):
+                        elif msg == '!хмель и солод' or msg == '!хc' or re.match(patterns['pattern_hmel_solod'], msg):
                             attachment = random.choice(loyality_cards['hmel_solod'])
                             send_msg(chat_id, text='держи, брат', attachment=attachment)
 
                         ##############################################################################
 
-                        elif msg in ('!help', '!хелп', '!памагите') or re.match(r'(?i).*(ержан).*(че|что умеешь).*'):
+                        elif msg in ('!help', '!хелп', '!памагите') or re.match(r'(?i).*(ержан).*(че|что умеешь).*', msg):
                             cards = '\n'.join(loyality_cards)
 
                             to_return = 'Список команд:\n' \
@@ -438,15 +438,15 @@ while True:
                                         '!рассвет\n' \
                                         '!закат\n' \
                                         '!время – текущее время\n' \
-                                        '!анек – рассказываю худщие анеки рунета\n' \
+                                        '!анек – рассказываю худшие анеки рунета\n' \
                                         '!зхд – осталось дней до зхд\n' \
                                         '!сезон – осталось дней до сезона\n' \
                                         '!работа – прошло времени с последнего запуска ержана на сервере\n\n' \
                                         'А также:\n' \
-                                        'Подскажу номер братка(есть только бойцы Джа)\n' \
-                                        'Гений математики, способный высчитать что угодно. Cпроси сколько...\n' \
-                                        'Отвечаю на любые вопросы, заданные мне\n' \
-                                        'Выезжаю на разборки\n\n' \
+                                        '· Подскажу номер братка(есть только бойцы Джа)\n' \
+                                        '· Гений математики, способный высчитать что угодно. Cпроси сколько...\n' \
+                                        '· Отвечаю на любые вопросы, заданные мне\n' \
+                                        '· Выезжаю на разборки\n\n' \
                                         'Список магазинов в базе:\n' \
                                         f'{cards}' \
 
@@ -546,7 +546,7 @@ while True:
                         # print(f" – Начало операции: {start_time} | Конец операции: {end_time}\n",
                         #       f"Длительность: {end_time - start_time}\n", '_______________________')
                 except Exception as e:
-                    pass
+                    print(e)
 
     except Exception:
         send_msg(1, 'Сервер перезагрузился')

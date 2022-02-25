@@ -17,7 +17,7 @@ def change_chat_name(title, chat_id):
                              {'chat_id': chat_id, 'title': title})
 
 
-default_chat_name = 'Джа’21 🚌'
+default_chat_name = 'Джа’22 🚌'
 chat_id = 2
 
 if __name__ == '__main__':
